@@ -4,7 +4,7 @@ import { validateGuides } from "../lib/validate.js";
 
 const guide = (slug, data = {}) => ({
   fileSlug: slug,
-  data: { title: slug, section: "mobile", order: 1, next: [], ...data },
+  data: { title: slug, layout: "guide.njk", section: "mobile", order: 1, next: [], ...data },
 });
 
 test("a clean set of guides has nothing to report", () => {
@@ -178,4 +178,65 @@ test("guides with no video never collide on grid title even if their titles matc
     ],
     new Set());
   assert.deepEqual(errors, []);
+});
+
+test("a guide with no layout is an error", () => {
+  const { errors } = validateGuides([guide("a", { layout: undefined })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*layout/);
+});
+
+test("a blank jobaid is an error, not a silently dropped block", () => {
+  const { errors } = validateGuides([guide("a", { jobaid: null })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*jobaid.*blank/);
+});
+
+test("a guide with no jobaid field at all is not an error", () => {
+  const { errors } = validateGuides([guide("a", {})], new Set());
+  assert.deepEqual(errors, []);
+});
+
+test("a blank video download is an error, not a silently dropped row", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4, download: null } })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video download.*blank/);
+});
+
+test("a video with no download field at all is not an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4 } })], new Set());
+  assert.deepEqual(errors, []);
+});
+
+test("a non-numeric video duration is an error, not a silent 'N min min'", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: "4 min" } })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*minutes.*not a number/);
+});
+
+test("a video gridDownload that is a real Drive file id is not an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4, gridDownload: "1yl8KG9yX6kr1eJQf4Upjz0wAoWL6gX8A" } })],
+    new Set());
+  assert.deepEqual(errors, []);
+});
+
+test("a video gridDownload that is a pasted Drive URL, not a bare id, is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", {
+      video: { id: "1", minutes: 4, gridDownload: "https://drive.google.com/uc?export=download&id=abc" },
+    })],
+    new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video gridDownload id/);
+});
+
+test("a blank video gridDownload is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4, gridDownload: null } })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video gridDownload.*blank/);
 });
