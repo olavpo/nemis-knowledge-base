@@ -261,24 +261,41 @@ body {
 
 /* Search — new UI added by Pagefind, no counterpart in the original site's
    Google-powered search widget; see tests/css-fidelity.test.js's
-   deliberately-unmapped list. */
+   deliberately-unmapped list.
+   Themed through Pagefind's own CSS custom properties (its documented
+   styling API — https://pagefind.app/docs/ui/#styling-with-css), not by
+   overriding its classes: pagefind-ui.css loads after this stylesheet and
+   its selectors carry Svelte scoping classes, so a same-specificity
+   override here only "wins" by accident of load order (fragile — see the
+   Task 9 fix report for what broke) or loses outright against Pagefind's
+   four-class selectors. Custom properties are the one theming path that
+   survives a Pagefind version bump changing its class names.
+   Two of these variables double up: --pagefind-ui-text colours both the
+   widget's general copy AND the result-title link (Pagefind exposes no
+   separate variable for the link), so the result link renders in --ink
+   rather than the site's --green accent — a deliberate approximation, not
+   an oversight. The same is true of the clear button, which also reads
+   --pagefind-ui-text rather than --ink-muted. */
 .site-search {
   flex: 1 1 260px;
   max-width: 260px;
   min-width: 160px;
-}
-.site-search .pagefind-ui__search-input {
-  font-family: var(--font);
-  font-size: 14px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 7px 12px;
-  width: 100%;
-  background: #fff;
+  --pagefind-ui-primary: var(--green);
+  --pagefind-ui-text: var(--ink);
+  --pagefind-ui-background: #fff;
+  --pagefind-ui-border: var(--line);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 6px;
+  --pagefind-ui-font: var(--font);
+  /* Pagefind sizes the search input's type from a 21px base; 0.667 brings
+     that to the site's 14px body size. Every other size in the widget
+     (result titles, excerpts, the clear button) scales down proportionally
+     from its own, larger base rather than landing on its own hand-picked
+     value — there's no single scale that hits all of them at once, and the
+     search input is the element visitors actually read and type into. */
+  --pagefind-ui-scale: 0.667;
 }
 .site-search .pagefind-ui__search-input:focus {
   outline: none;
   border-color: var(--green);
 }
-.site-search .pagefind-ui__search-clear { font-size: 12px; color: var(--ink-muted); }
-.site-search .pagefind-ui__result-title a { color: var(--green); }

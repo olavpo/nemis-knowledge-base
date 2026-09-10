@@ -458,3 +458,40 @@ test("the chrome is excluded from the index so results are page content", () => 
   assert.equal($(".site-header[data-pagefind-ignore]").length, 1);
   assert.equal($(".site-footer[data-pagefind-ignore]").length, 1);
 });
+
+// Fix round 1 (Task 9 review): a first pass styled the search box by
+// overriding Pagefind's own classes directly (.pagefind-ui__search-input,
+// .pagefind-ui__result-title a, ...). That looked fine reading the CSS
+// source, but Pagefind's pagefind-ui.css loads after this stylesheet and
+// most of those rules tie on specificity, so the later sheet won; the
+// result-title override lost outright, against four Svelte-scoped classes
+// on Pagefind's side. Confirmed live in a browser: only font-family and the
+// :focus border-colour actually rendered — font-size, border-colour,
+// border-radius, padding and the result-link colour were all Pagefind's
+// defaults, not the site's.
+//
+// The fix themes the widget through Pagefind's own CSS custom properties
+// (its documented styling API), which the widget itself reads regardless
+// of stylesheet order or Pagefind's internal class names. A test can't
+// exercise the actual cascade a browser resolves — that's exactly the gap
+// that let the first pass pass a source read and still render wrong — so
+// this only checks that the supported variables are declared on the
+// container and that this doesn't regress back to overriding Pagefind's own
+// classes. It does not prove those variables are honoured by the installed
+// Pagefind version, or what a browser actually paints; that was verified
+// separately with Playwright against the running dev server (see the Task 9
+// fix report for the computed-style values).
+test("the search box is themed through Pagefind's custom properties, not by overriding its classes", () => {
+  const css = read("assets/style.css");
+  const rule = css.match(/\.site-search\s*\{([^}]*)\}/s);
+  assert.ok(rule, ".site-search rule not found in the built stylesheet");
+  for (const prop of ["--pagefind-ui-primary", "--pagefind-ui-text", "--pagefind-ui-background",
+                      "--pagefind-ui-border", "--pagefind-ui-border-radius", "--pagefind-ui-font",
+                      "--pagefind-ui-scale"]) {
+    assert.ok(rule[1].includes(prop), `.site-search does not declare ${prop}`);
+  }
+  assert.ok(!/\.pagefind-ui__search-clear\s*\{/.test(css),
+    "found a direct override on .pagefind-ui__search-clear — theme it via the custom properties instead");
+  assert.ok(!/\.pagefind-ui__result-title\s+a\s*\{/.test(css),
+    "found a direct override on .pagefind-ui__result-title a — theme it via the custom properties instead");
+});
