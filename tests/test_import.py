@@ -15,7 +15,12 @@ import import_from_mirror as imp  # noqa: E402
 
 EMBEDS = ROOT / "docs" / "source-embeds"
 CONTENT_GUIDES = ROOT / "content" / "guides"
-PDFS = ROOT / "incoming-pdfs"
+
+# assets/pdfs/ is what's actually committed and served (incoming-pdfs/ is a
+# gitignored staging area for tools/fetch_pdfs.py) — pointing here instead
+# means this check works on a fresh clone, not just in a working copy that
+# still has the original staging fetch sitting around.
+PDFS = ROOT / "assets" / "pdfs"
 FRONT_MATTER_FENCE = re.compile(r"(?m)^---\s*$")
 failures = []
 
@@ -183,7 +188,7 @@ def main():
 
         jobaid = front_matter.get("jobaid")
         check(bool(jobaid) and (PDFS / jobaid).is_file(),
-              f"{slug}.md: jobaid file exists in incoming-pdfs/ ({jobaid})")
+              f"{slug}.md: jobaid file exists in assets/pdfs/ ({jobaid})")
 
     if failures:
         print(f"\n{len(failures)} check(s) failed:")
