@@ -34,11 +34,14 @@ const readEmbed = (file) => readFileSync(new URL(file, EMBEDS_DIR), "utf8");
 const CSS_FIDELITY_MAP = {
   // mobile-install-login.html: base page chrome shared by every page in the
   // original site. manuals.html's own `body` rule uses a different
-  // background (#fff4d6, a cream tone specific to that page) instead of the
-  // #f4f6f4 every guide embed and home.html agree on — a real, page-specific
-  // choice in the original, not a mistake. The guide-page value is what's
-  // shipped today; whoever builds the manuals page needs #fff4d6 there, not
-  // this value.
+  // background (#fff4d6, a cream tone specific to that page) — but that was
+  // a Google Sites artifact, not a structural choice worth preserving: each
+  // "page" there was really an iframed embed floating inside a shared shell,
+  // so manuals.html's own cream background only ever showed as a strip
+  // around its embed. This rebuild has no iframe — body IS the whole page —
+  // so carrying the cream over would make the manuals page look *less* like
+  // the original, not more. #f4f6f4 (this value) is deliberately kept for
+  // every page, manuals included; do not "restore" #fff4d6 here.
   "body": "mobile-install-login.html",
 
   // manuals.html: the only embed that defines these (the plan's Step 7
@@ -105,6 +108,12 @@ const CSS_FIDELITY_MAP = {
   ".card-title": "home.html",
   ".tag-video": "home.html",
   ".tag-jobaid": "home.html",
+
+  // watch-all-videos.html: the video grid restored on the "Watch all
+  // videos" page. Not previously in this map — an omission, not a decision.
+  ".video-card": "watch-all-videos.html",
+  ".video-wrapper": "watch-all-videos.html",
+  ".video-title": "watch-all-videos.html",
 };
 
 // Selectors deliberately left out of the map above, and why. This list is
@@ -126,13 +135,21 @@ const CSS_FIDELITY_MAP = {
 //    follow for cards (see the .card:hover comment above) — so there's no
 //    value here worth pinning against a source this project doesn't
 //    otherwise use for card colour.
+// 2b. .card-download, .section-icon — manuals.html-only, same situation as
+//    .card:focus-visible above: manuals.html is the *only* source that
+//    defines either of these, and it uses #007d53 for both, the same green
+//    this project deliberately unified to #2d6a4f (--green) everywhere else
+//    (see .section-label and .card:hover above). Pinning these against
+//    manuals.html would just re-fail the one deviation this project already
+//    decided on, so — like .card:focus-visible — they're recorded here as a
+//    deliberate exclusion rather than in the map, where a literal-colour
+//    comparison against their only source could never pass without undoing
+//    that decision.
 // 3. .video-container iframe, .pdf-container iframe — both only declare
 //    `border: none`. No concrete colour value on either side to compare.
-// 4. .site-search, .site-search .pagefind-ui__search-input,
-//    .site-search .pagefind-ui__search-input:focus,
-//    .site-search .pagefind-ui__search-clear,
-//    .site-search .pagefind-ui__result-title a — the search box added in
-//    Task 9. The original site's search was Google Sites' own widget, never
+// 4. .site-search, .site-search .pagefind-ui__search-input:focus,
+//    #search .pagefind-ui__search-clear — the search box added in Task 9.
+//    The original site's search was Google Sites' own widget, never
 //    captured in docs/source-embeds/, so there is no source rule to compare
 //    against; its colours were chosen to match the site's existing tokens
 //    (--font, --line, --green, --ink-muted) instead.
@@ -229,12 +246,13 @@ const shippedCss = readFileSync(STYLE_PATH, "utf8");
 const rootVars = parseRootVars(shippedCss);
 
 for (const [selector, sourceFile] of Object.entries(CSS_FIDELITY_MAP)) {
-  test(`colour fidelity: ${selector} matches ${sourceFile}`, (t) => {
+  test(`colour fidelity: ${selector} matches ${sourceFile}`, () => {
     const shippedRule = extractRule(shippedCss, selector);
-    if (!shippedRule) {
-      t.skip(`${selector} is not implemented in assets/style.css yet`);
-      return;
-    }
+    // A selector in this map that isn't in the shipped stylesheet is a
+    // regression (someone deleted the rule), not something to wave through —
+    // t.skip() here used to turn "the rule vanished" into a silent green
+    // skip instead of a failure.
+    assert.ok(shippedRule, `${selector} is mapped in CSS_FIDELITY_MAP but not found in assets/style.css`);
     const sourceCss = readEmbed(sourceFile);
     const sourceRule = extractRule(sourceCss, selector);
     assert.ok(sourceRule, `${selector} not found in docs/source-embeds/${sourceFile} — fix CSS_FIDELITY_MAP`);
