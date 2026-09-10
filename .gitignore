@@ -6,3 +6,6 @@ __pycache__/
 *.py[cod]
 .venv/
 .DS_Store
+
+# Staging area for tools/fetch_pdfs.py
+incoming-pdfs/
