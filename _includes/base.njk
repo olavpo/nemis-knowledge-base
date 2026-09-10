@@ -10,16 +10,31 @@
 <body>
 
 <header class="site-header" data-pagefind-ignore>
-  <a class="site-brand" href="{{ '/' | url }}">
-    <img class="site-logo" src="{{ site.logo | url }}" alt="{{ site.logoAlt }}">
-    <span class="site-title">{{ site.title }}</span>
-  </a>
-  <nav class="site-nav">
-    {% for item in site.nav %}
-    <a href="{{ item.url | url }}"{% if item.url == page.url %} aria-current="page"{% endif %}>{{ item.text }}</a>
-    {% endfor %}
-  </nav>
-  <div id="search" class="site-search"></div>
+  <div class="site-header-bar">
+    <a class="site-brand" href="{{ '/' | url }}">
+      <img class="site-logo" src="{{ site.logo | url }}" alt="{{ site.logoAlt }}">
+      <span class="site-title">{{ site.title }}</span>
+    </a>
+    <nav class="site-nav" id="site-nav">
+      {% for item in site.nav %}
+      <a href="{{ item.url | url }}"{% if item.url == page.url %} aria-current="page"{% endif %}>{{ item.text }}</a>
+      {% endfor %}
+    </nav>
+    <button type="button" class="icon-toggle nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 6h16"/>
+        <path d="M4 12h16"/>
+        <path d="M4 18h16"/>
+      </svg>
+    </button>
+    <button type="button" class="icon-toggle search-toggle" id="search-toggle" aria-expanded="false" aria-controls="search" aria-label="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-3.6-3.6"/>
+      </svg>
+    </button>
+    <div id="search" class="site-search"></div>
+  </div>
 </header>
 
 {% if hero %}
@@ -38,6 +53,7 @@
 
 <footer class="site-footer" data-pagefind-ignore>{{ site.footer }}</footer>
 
+<script src="{{ '/assets/header.js' | url }}"></script>
 <script src="{{ '/pagefind/pagefind-ui.js' | url }}"></script>
 <script>
   window.addEventListener("DOMContentLoaded", () => {

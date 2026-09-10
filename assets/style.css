@@ -18,15 +18,28 @@ body {
   line-height: 1.5;
 }
 
+/* Site header. The bar (.site-header-bar) is a single non-wrapping flex
+   row at every width — see the max-width: 839px/599px rules further down
+   for the two-stage collapse (search -> icon, then nav -> hamburger) that
+   keeps it that way instead of letting flex-wrap fold it into extra rows.
+   .site-header itself carries no overflow (and must not gain one): it
+   would clip the Pagefind results drawer (#search .pagefind-ui__drawer,
+   further down this file) and the collapsed nav/search panels below, both
+   of which are position: absolute children that deliberately extend past
+   the header's own box. */
 .site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  background: #fff;
-  border-bottom: 1px solid var(--line);
+  flex-wrap: nowrap;
+  gap: 12px 16px;
   padding: 12px 24px;
+  position: relative;
 }
 
 .site-brand {
@@ -35,13 +48,34 @@ body {
   gap: 12px;
   text-decoration: none;
   color: inherit;
+  min-width: 0;
 }
 
-.site-logo { height: 34px; width: auto; }
+.site-logo { height: 34px; width: auto; flex-shrink: 0; }
 
-.site-title { font-size: 17px; font-weight: 700; }
+/* Shrinks and ellipsizes rather than squeezing illegible or forcing the bar
+   to wrap. min-width: 0 overrides the flex-item default (min-width: auto),
+   which would otherwise refuse to shrink below the text's natural width and
+   defeat text-overflow entirely. */
+.site-title {
+  font-size: 17px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
 
-.site-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+/* flex-shrink: 0 and flex-wrap: nowrap keep the three nav links themselves
+   from silently wrapping onto a second internal line as the header-bar's
+   available width tightens — the header-bar's own default flex shrinking
+   would otherwise squeeze .site-nav's width before it squeezes .site-search
+   (which has an explicit min-width floor) or .site-title (which ellipsizes),
+   and a wrapped nav is exactly the multi-row look this rebuild is fixing.
+   Below 600px this same rule becomes the collapsed dropdown panel (see
+   max-width: 599px further down), where nowrap instead keeps it a single
+   column rather than wrapping into a multi-column list. */
+.site-nav { display: flex; gap: 20px; flex-wrap: nowrap; flex-shrink: 0; }
 
 .site-nav a {
   font-size: 14px;
@@ -57,6 +91,31 @@ body {
 .site-nav a[aria-current="page"] {
   color: var(--green);
   border-bottom-color: var(--green);
+}
+
+/* Icon-only toggles for the collapsed search/nav. Both stay display: none
+   here and are only switched on inside the max-width: 839px (search) and
+   max-width: 599px (nav) rules near the bottom of this file, so the
+   >=840px one-row header never depends on this display flip happening —
+   with JavaScript disabled the buttons simply never appear, exactly as at
+   >=840px with JS on. 40x40px so the hit area is comfortable on a phone. */
+.icon-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.icon-toggle:hover,
+.icon-toggle[aria-expanded="true"] {
+  background: var(--page);
+  color: var(--green);
 }
 
 .hero { padding: 32px 24px 8px; max-width: 900px; margin: 0 auto; }
@@ -328,7 +387,10 @@ body {
 .site-search {
   /* Positioning context for the results drawer below (#search
      .pagefind-ui__drawer) so it floats over the page instead of pushing it
-     down. */
+     down. Below 840px this same rule's own position is switched to
+     absolute (see max-width: 839px further down) so the search field can
+     become a collapsible full-width row — that's still a non-static
+     position, so it still works as the drawer's containing block. */
   position: relative;
   flex: 1 1 260px;
   max-width: 260px;
@@ -408,4 +470,58 @@ body {
     min-width: 0;
     max-width: none;
   }
+}
+
+/* ---- responsive header: search collapses to an icon first (<840px),
+   then the nav collapses into a hamburger panel (<600px) — see
+   assets/header.js for the toggle behaviour. Both collapsed panels anchor
+   to .site-header-bar (position: relative, above) and share the same
+   below-the-bar slot; header.js keeps only one open at a time. Neither
+   rule below fires at >=840px, so the one-row, all-inline header at that
+   width renders correctly with JavaScript disabled. */
+@media (max-width: 839px) {
+  .search-toggle { display: inline-flex; }
+
+  .site-search {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-width: none;
+    padding: 10px 16px;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    z-index: 30;
+  }
+  .site-search.is-open { display: block; }
+}
+
+@media (max-width: 599px) {
+  .nav-toggle { display: inline-flex; }
+
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    z-index: 30;
+  }
+  .site-nav.is-open { display: flex; }
+  .site-nav a {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 479px) {
+  .site-header-bar { padding: 10px 16px; gap: 8px; }
 }
