@@ -1,0 +1,8 @@
+# Output of mirror_google_site.py
+site/
+site-*/
+
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
