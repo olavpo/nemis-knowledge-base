@@ -98,6 +98,27 @@ body {
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-arrow { font-size: 20px; color: #aaa; margin-left: 12px; line-height: 1; }
 
+/* Manuals card's download affordance (docs/source-embeds/manuals.html
+   :119-127, :161-169). The source uses #007d53 here; this project unified
+   that green to #2d6a4f (--green) for .section-label (see
+   tests/css-fidelity.test.js), and this is the same deliberate deviation for
+   consistency, not a fidelity miss — see CSS_FIDELITY_MAP's comment on both
+   selectors. */
+.card-download {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .card-download span { display: none; }
+}
+
 .tag {
   font-size: 11px;
   font-weight: 600;
@@ -221,7 +242,7 @@ body {
 }
 .section-title { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
 .section-desc { font-size: 14px; color: #555; margin-bottom: 16px; }
-.section-icon { vertical-align: -3px; margin-right: 6px; }
+.section-icon { vertical-align: -3px; margin-right: 6px; color: var(--green); }
 
 /* ---- video grid ---- */
 /* The original used a fixed repeat(3, 1fr) collapsing to one column below

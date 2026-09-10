@@ -441,6 +441,33 @@ test("manuals lists the handbook with a size read from the PDF", () => {
   assert.equal($(".tag-size").text().trim(), "864 KB");
 });
 
+// The manuals card originally showed a green download icon plus a bold
+// "Download" label (docs/source-embeds/manuals.html:161-169), not the plain
+// chevron every other card on the site uses — the rebuild had dropped it
+// down to a bare .card-arrow.
+test("the manuals card shows a Download affordance, not the plain arrow", () => {
+  const $ = load("manuals/index.html");
+  assert.equal($("a.card .card-arrow").length, 0, "manuals card still has the plain chevron");
+  const download = $("a.card .card-download");
+  assert.equal(download.length, 1);
+  assert.equal(download.find("svg").length, 1);
+  assert.equal(download.find("span").text().trim(), "Download");
+});
+
+// The decorative book icon that sat next to "Reference manuals" in the
+// original (docs/source-embeds/manuals.html's .section-icon) — restored in
+// the hero, since that's where the heading lives now.
+test("the manuals hero shows the decorative book icon, and no other hero does", () => {
+  const manuals = load("manuals/index.html");
+  const icon = manuals(".hero-title .section-icon");
+  assert.equal(icon.length, 1);
+  assert.equal(icon.attr("aria-hidden"), "true");
+  for (const page of ["index.html", "watch-all-videos/index.html", "mobile-install-login/index.html"]) {
+    const $ = load(page);
+    assert.equal($(".section-icon").length, 0, `${page} unexpectedly has .section-icon`);
+  }
+});
+
 // cheerio recovers elements by selector no matter how broken the underlying
 // tree is, so — exactly as with the home page's no-video cards — a
 // cheerio-based assertion here cannot tell a stray <p> apart from valid
