@@ -6,6 +6,7 @@ order: 1
 video:
   id: "1172391157"
   minutes: 2
+  download: 1pOA81m6uy2bXwCIDcbG6p0tqEf0vpYIn
 jobaid: computer-login-navigate.pdf
 next:
   - computer-census-data

@@ -8,6 +8,12 @@ layout: base.njk
 {% if video %}
 <hr class="divider">
 {% include "video.njk" %}
+{% if video.download %}
+<div class="download-row">
+  <span class="download-hint">Save for offline use?</span>
+  <a class="download-btn" href="https://drive.google.com/uc?export=download&id={{ video.download }}" target="_blank" rel="noopener">&darr; Download video</a>
+</div>
+{% endif %}
 {% endif %}
 
 {% if jobaid %}

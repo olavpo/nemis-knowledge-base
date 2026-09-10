@@ -7,6 +7,7 @@ video:
   id: "1172391393"
   minutes: 5
   title: "Enrol a staff member on Android"
+  download: 1sQRN24P50gUnoYFojz_ppKHW47cCaUtm
 jobaid: mobile-enrol-staff.pdf
 next:
   - mobile-classroom-data

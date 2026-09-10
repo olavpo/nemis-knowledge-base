@@ -75,6 +75,12 @@ const SLUGS = [
   "computer-change-password",
 ];
 
+// The three guides with no video (and so, no video download row either).
+// Everything else in SLUGS has both.
+const NO_VIDEO_SLUGS = new Set([
+  "computer-enrol-bulk", "computer-enrol-existing-staff", "computer-change-password",
+]);
+
 // Expected page counts and sizes, verified against the PDFs committed at
 // assets/pdfs/. These are literal values, not formats: a bug that reports
 // the same page count for every job aid would still satisfy a format regex,
@@ -116,6 +122,30 @@ test("a guide embeds its video from Vimeo with the duration", () => {
     "https://player.vimeo.com/video/1172389199");
   assert.equal($(".label-video").text().trim(), "Video");
   assert.match($(".resource-header-meta").first().text(), /4 min/);
+});
+
+// "Save for offline use?" is aimed at school staff on unreliable
+// connections, which is this whole site's audience: every guide that has a
+// video must offer this Drive fallback download, and no guide without a
+// video should render the row at all.
+test("every guide with a video renders exactly one video download link to Drive, and guides without a video render none", () => {
+  for (const slug of SLUGS) {
+    const $ = load(`${slug}/index.html`);
+    const videoDownloads = $("a.download-btn").filter((_, el) => {
+      const href = $(el).attr("href") || "";
+      return href.startsWith("https://drive.google.com/uc?export=download&id=");
+    });
+    if (NO_VIDEO_SLUGS.has(slug)) {
+      assert.equal(videoDownloads.length, 0,
+        `${slug} has no video and should render no video download link`);
+    } else {
+      assert.equal(videoDownloads.length, 1,
+        `${slug} should render exactly one video download link`);
+      assert.equal(videoDownloads.attr("target"), "_blank");
+      assert.equal(videoDownloads.attr("rel"), "noopener");
+      assert.equal(videoDownloads.text().trim(), "↓ Download video");
+    }
+  }
 });
 
 test("a guide embeds its job aid from the local PDF, not from Drive", () => {
@@ -164,7 +194,11 @@ test("a subdirectory build prefixes a guide page's PDF and card URLs", () => {
   const $ = cheerio.load(
     readFileSync(join(out, "mobile-install-login", "index.html"), "utf8"));
   assert.equal($(".pdf-container iframe").attr("src"), "/kb/assets/pdfs/mobile-install-login.pdf");
-  assert.equal($(".download-btn").attr("href"), "/kb/assets/pdfs/mobile-install-login.pdf");
+  // mobile-install-login also has a video download button (an external Drive
+  // URL, never prefixed), so pick out the job-aid one by its href rather than
+  // assuming it's the only .download-btn on the page.
+  const jobAidBtn = $(".download-btn").filter((_, el) => $(el).attr("href").endsWith(".pdf"));
+  assert.equal(jobAidBtn.attr("href"), "/kb/assets/pdfs/mobile-install-login.pdf");
   assert.deepEqual($(".next-list a.card").map((_, a) => $(a).attr("href")).get(),
     ["/kb/mobile-enrol-individually/", "/kb/mobile-enrol-staff/"]);
 });

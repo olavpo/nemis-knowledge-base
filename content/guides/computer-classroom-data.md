@@ -7,6 +7,7 @@ video:
   id: "1172391350"
   minutes: 3
   title: "Enter classroom data (Web)"
+  download: 1k3wToR4OIVyEqow1pS4OB2sTS9R2o7s9
 jobaid: computer-classroom-data.pdf
 next:
   - computer-census-data

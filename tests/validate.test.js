@@ -75,6 +75,30 @@ test("a video id that is not a Vimeo id is an error", () => {
   assert.match(errors[0], /a\b.*video id/);
 });
 
+test("a video download that is a real Drive file id is not an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4, download: "1yl8KG9yX6kr1eJQf4Upjz0wAoWL6gX8A" } })],
+    new Set());
+  assert.deepEqual(errors, []);
+});
+
+test("a video download that is a pasted Drive URL, not a bare id, is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", {
+      video: { id: "1", minutes: 4, download: "https://drive.google.com/uc?export=download&id=abc" },
+    })],
+    new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video download id/);
+});
+
+test("a video download containing a slash is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "1", minutes: 4, download: "abc/def" } })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video download id/);
+});
+
 test("a missing order is an error", () => {
   const { errors } = validateGuides([guide("a", { order: undefined })], new Set());
   assert.equal(errors.length, 1);

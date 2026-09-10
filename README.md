@@ -51,7 +51,7 @@ else, here is what each front-matter field does:
 | `title` | The page heading, and the text shown on the guide's card. |
 | `section` | `mobile` or `computer` — which group the guide appears under on the home page. No other value is allowed. |
 | `order` | A whole number that sets the guide's position within its section (lower numbers come first). Two guides in the same section can't share a number. |
-| `video` | Optional. If present, embeds a Vimeo video. `id` is the numeric Vimeo id (digits only — copy it from the Vimeo share link). `minutes` is the video's length, shown as a badge. `title` is optional and only needed if this guide's plain `title` would otherwise be identical to another guide's on the "Watch all videos" page — it overrides the heading shown there. |
+| `video` | Optional. If present, embeds a Vimeo video. `id` is the numeric Vimeo id (digits only — copy it from the Vimeo share link). `minutes` is the video's length, shown as a badge. `title` is optional and only needed if this guide's plain `title` would otherwise be identical to another guide's on the "Watch all videos" page — it overrides the heading shown there. `download` is optional: a Google Drive file id (not a full URL) for that same video, which adds a "Save for offline use?" download link below the player — see "The Vimeo and Drive dependencies" below. |
 | `jobaid` | Optional. The filename of a PDF already sitting in `assets/pdfs/`. It's shown embedded on the page with a download button. |
 | `next` | Optional. A list of other guides' filenames (without `.md`) to show as "Do this next" cards at the bottom of the page. |
 
@@ -150,6 +150,11 @@ the live site. In plain language, the checks are:
   id, not a URL or anything else).
   Example: `computer-foo.md: video id "https://vimeo.com/123" is not a
   Vimeo id (expected digits only)`
+- If `video.download` is set, it's a bare Drive file id (letters, digits,
+  `-` and `_` only) — not a full Drive URL.
+  Example: `computer-foo.md: video download id
+  "https://drive.google.com/uc?export=download&id=abc" is not a Drive
+  file id (expected letters, digits, - and _ only)`
 - Two guides can't end up showing the same heading on the "Watch all
   videos" page (their `video.title`, or their plain `title` if no
   `video.title` is set).
@@ -164,23 +169,31 @@ no page anywhere on the site links to a URL that wasn't actually built —
 catching a typo'd `next` target or a stale link that the checks above don't
 cover.
 
-## The Vimeo dependency
+## The Vimeo and Drive dependencies
 
-Every guide's video is an embedded Vimeo player, keyed off the numeric
-`video.id` in that guide's front matter. Vimeo is the one external service
-this site still depends on: if access to the Vimeo account that owns these
-nine videos is ever lost, or a video there is deleted or made private, the
-embed will go blank with no warning — the build only checks that a
-`video.id` *looks like* a Vimeo id (digits), not that the video is still
-reachable. If that happens, the fix is to re-host the video file (on Vimeo
-again, or elsewhere) and update the `video.id` on that one guide.
+Two external services are still involved in a guide's video, and both are
+things a future editor should know can go quietly wrong.
 
-For context: the original Google Site had a separate "↓ Download video"
-link under each video, pointing at a file on Google Drive. That link was
-deliberately not carried over when this site was rebuilt (the Drive file
-ids were never recorded anywhere in this repository), so there is no
-Google Drive dependency left. The "Download" button you do see on a guide
-page downloads that guide's local job-aid PDF, not its video.
+**Vimeo** hosts the video itself, keyed off the numeric `video.id` in that
+guide's front matter. If access to the Vimeo account that owns these nine
+videos is ever lost, or a video there is deleted or made private, the
+embedded player will go blank with no warning — the build only checks that
+a `video.id` *looks like* a Vimeo id (digits), not that the video is still
+reachable.
+
+**Google Drive** is the fallback for offline use: nine guides also carry a
+`video.download` field (a Drive file id) that renders a "Save for offline
+use?" link below the video, for school staff on an unreliable connection
+who would rather download the file than stream it. This is the more
+fragile of the two dependencies — each of those nine links breaks silently
+the moment its individual Drive share lapses or the file is moved, and
+nothing in the build can detect that (it only checks that `video.download`
+*looks like* a bare Drive file id, not a pasted URL — not that the file is
+still shared).
+
+If either breaks, the fix is the same shape: get the source file, re-host
+it (on Vimeo, or upload a fresh copy to Drive and share it publicly), and
+update that one guide's `video.id` or `video.download`.
 
 ## Where this came from
 
