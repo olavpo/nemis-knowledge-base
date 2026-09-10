@@ -252,13 +252,28 @@ workflow stops there and nothing is published.
   from the Actions tab). Needs GitHub Pages turned on once for this
   repository, under Settings → Pages → Source: GitHub Actions. No secrets
   required.
+
+  A GitHub Pages *project* site (the normal case: `https://<user>.github.io/
+  <repo>/`) serves from a subpath, not from `/`, so this workflow handles
+  that automatically: it validates the site with a plain, unprefixed
+  `npm test` first, then asks GitHub (`actions/configure-pages`) what the
+  site's real base path is and rebuilds once more with that as
+  `PATH_PREFIX` before publishing — that second, prefixed build is the one
+  that actually gets deployed. If you later put the site on a custom domain
+  (or it's ever a user/org root site instead of a project site), the base
+  path GitHub reports is empty and this becomes a no-op, so nothing here
+  needs to change either way.
 - **`.github/workflows/deploy.yml`** — copies the built site to a separate
   web server over `rsync`/SSH. This one is manual-only for now
   (`workflow_dispatch` in the Actions tab) since which server to use hasn't
   been decided; the push trigger is written in but commented out, so
-  switching to "deploy on every push" later is a one-line change. It needs
-  four repository secrets set under Settings → Secrets and variables →
-  Actions:
+  switching to "deploy on every push" later is a one-line change. It builds
+  and syncs with no `PATH_PREFIX`, on the assumption that a self-hosted
+  server puts the site at its own web root (`/`) rather than a subpath — if
+  that's ever not the case, this workflow needs the same two-build
+  treatment as the Pages one, with `PATH_PREFIX` set by hand rather than
+  read from `configure-pages`. It needs four repository secrets set under
+  Settings → Secrets and variables → Actions:
 
   | Secret | What it is |
   | --- | --- |

@@ -26,6 +26,19 @@ jobs:
       - run: npm ci
       - run: npm test
       - uses: actions/configure-pages@v5
+        id: pages
+      # npm test just validated a plain, unprefixed build (its assertions
+      # expect root-relative URLs like /assets/style.css, so it can't run
+      # under a prefix) — this second build is the one that actually gets
+      # deployed, rebuilt with the site's real base path so every internal
+      # link, asset and Pagefind URL resolves once Pages serves it from a
+      # subpath. Do not collapse this back into one build: a project Pages
+      # site (https://<user>.github.io/<repo>/) needs base_path, and only a
+      # user/org site or a custom domain has an empty one (which still needs
+      # the trailing slash added below to become "/").
+      - run: npm run build
+        env:
+          PATH_PREFIX: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
