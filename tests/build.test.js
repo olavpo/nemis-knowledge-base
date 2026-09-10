@@ -6,6 +6,8 @@ import { gunzipSync } from "node:zlib";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
+import yaml from "js-yaml";
+import { SECTIONS } from "../lib/validate.js";
 
 const read = (p) => readFileSync(new URL(`../_site/${p}`, import.meta.url), "utf8");
 const load = (p) => cheerio.load(read(p));
@@ -247,12 +249,69 @@ test("the home page lists all twelve guides in order", () => {
     SLUGS.map((s) => `/${s}/`));
 });
 
+// Every one of the twelve guides, not just a sample — computer-enrol-bulk,
+// computer-enrol-existing-staff and computer-change-password have no video
+// and must show "Job aid" only; the rest show both. This list was checked
+// against each guide's own front matter, not copied from card.njk's output.
+const EXPECTED_HOME_TAGS = {
+  "mobile-install-login": ["Video", "Job aid"],
+  "mobile-enrol-individually": ["Video", "Job aid"],
+  "mobile-enrol-staff": ["Video", "Job aid"],
+  "mobile-classroom-data": ["Video", "Job aid"],
+  "computer-login-navigate": ["Video", "Job aid"],
+  "computer-census-data": ["Video", "Job aid"],
+  "computer-enrol-individually": ["Video", "Job aid"],
+  "computer-enrol-bulk": ["Job aid"],
+  "computer-enrol-staff": ["Video", "Job aid"],
+  "computer-enrol-existing-staff": ["Job aid"],
+  "computer-classroom-data": ["Video", "Job aid"],
+  "computer-change-password": ["Job aid"],
+};
+
 test("home page tags follow each guide's own fields", () => {
   const $ = load("index.html");
   const tagsFor = (slug) => $(`.section a.card[href="/${slug}/"] .tag`)
     .map((_, t) => $(t).text().trim()).get();
-  assert.deepEqual(tagsFor("mobile-install-login"), ["Video", "Job aid"]);
-  assert.deepEqual(tagsFor("computer-enrol-bulk"), ["Job aid"]);
-  assert.deepEqual(tagsFor("computer-change-password"), ["Job aid"]);
-  assert.deepEqual(tagsFor("mobile-enrol-staff"), ["Video", "Job aid"]);
+  for (const slug of SLUGS) {
+    assert.deepEqual(tagsFor(slug), EXPECTED_HOME_TAGS[slug], `${slug} tags`);
+  }
+});
+
+// cheerio's parser recovers from broken HTML no matter how mangled the tree
+// is, so a cheerio-based assertion cannot tell malformed markup from valid
+// markup here — it silently found ".tag" either way. This has to check the
+// raw bytes markdown-it actually emitted. It exists because a no-video
+// guide's card collapses one of card.njk's two {% if %} guards to a
+// whitespace-only line; on the home page (which is Markdown, unlike guide
+// pages) that blank line broke CommonMark's raw-HTML-block parsing and
+// markdown-it wrapped the surviving <span> in a stray <p>, which then closed
+// in the wrong place (`</div></p>`) instead of after the </div>.
+test("no-video cards on the home page render as valid HTML, not through markdown-it's paragraph fallback", () => {
+  const html = read("index.html");
+  const noVideoSlugs = SLUGS.filter((s) => EXPECTED_HOME_TAGS[s].length === 1);
+  assert.deepEqual(noVideoSlugs,
+    ["computer-enrol-bulk", "computer-enrol-existing-staff", "computer-change-password"]);
+  for (const slug of noVideoSlugs) {
+    const cardStart = html.indexOf(`href="/${slug}/"`);
+    assert.ok(cardStart !== -1, `${slug} card not found`);
+    const tagsOpen = html.indexOf('<div class="card-tags">', cardStart);
+    const tagsClose = html.indexOf("</div>", tagsOpen);
+    const between = html.slice(tagsOpen, tagsClose);
+    assert.ok(!between.includes("<p>"), `${slug} .card-tags contains a stray <p>: ${between}`);
+  }
+  assert.ok(!html.includes("</div></p>"),
+    "home page contains a </div></p> sequence — markdown-it broke out of a raw HTML block");
+});
+
+// lib/validate.js's SECTIONS and content/index.md's sections[].key are two
+// independently maintained lists that only work together because they
+// happen to agree. If a section were ever added to one without the other,
+// guides in it would either fail validation for no reason or validate fine
+// and silently vanish from the home page.
+test("every section the validator accepts has a home page group, and vice versa", () => {
+  const raw = readFileSync(new URL("../content/index.md", import.meta.url), "utf8");
+  const frontMatter = raw.match(/^---\n([\s\S]*?)\n---/)[1];
+  const { sections } = yaml.load(frontMatter);
+  const homeKeys = new Set(sections.map((s) => s.key));
+  assert.deepEqual(homeKeys, SECTIONS);
 });
