@@ -334,6 +334,30 @@ test("each video card links to its guide", () => {
   assert.ok(!hrefs.includes("/computer-enrol-bulk/"), "bulk enrolment has no video");
 });
 
+// The mobile and Web guides for "enrol learners individually", "enrol a
+// staff member", and "enter classroom data" would otherwise render
+// identical titles on the one page whose purpose is telling them apart.
+// The original site disambiguated exactly these six (and only these six —
+// "Install the app and log in" etc. had no collision and got no suffix), so
+// this checks literal strings copied from docs/source-embeds/
+// watch-all-videos.html, in the order the page actually renders them, not a
+// derived/formatted comparison.
+test("video card titles match the original's disambiguated wording, in order", () => {
+  const $ = load("watch-all-videos/index.html");
+  const titles = $(".video-card .video-title a").map((_, a) => $(a).text().trim()).get();
+  assert.deepEqual(titles, [
+    "Install the app and log in",
+    "Enrol learners individually on Android",
+    "Enrol a staff member on Android",
+    "Enter classroom data on Android",
+    "Log in and navigate DNEMIS",
+    "Enter school census data",
+    "Enrol learners individually (Web)",
+    "Enrol a staff member (Web)",
+    "Enter classroom data (Web)",
+  ]);
+});
+
 // The videos page must not carry the original's per-video "↓ Download"
 // links — those pointed at Google Drive, and the Drive ids are deliberately
 // not in the guide front matter. The per-guide download button (on the

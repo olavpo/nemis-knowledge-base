@@ -6,6 +6,7 @@ order: 2
 video:
   id: "1183840330"
   minutes:
+  title: "Enrol learners individually on Android"
 jobaid: mobile-enrol-individually.pdf
 next:
   - mobile-enrol-staff

@@ -6,6 +6,7 @@ order: 3
 video:
   id: "1172391393"
   minutes: 5
+  title: "Enrol a staff member on Android"
 jobaid: mobile-enrol-staff.pdf
 next:
   - mobile-classroom-data

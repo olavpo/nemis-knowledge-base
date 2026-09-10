@@ -6,6 +6,7 @@ order: 3
 video:
   id: "1179201360"
   minutes: 5
+  title: "Enrol learners individually (Web)"
 jobaid: computer-enrol-individually.pdf
 next:
   - computer-enrol-bulk

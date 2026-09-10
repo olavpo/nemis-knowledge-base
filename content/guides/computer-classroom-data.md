@@ -6,6 +6,7 @@ order: 7
 video:
   id: "1172391350"
   minutes: 3
+  title: "Enter classroom data (Web)"
 jobaid: computer-classroom-data.pdf
 next:
   - computer-census-data

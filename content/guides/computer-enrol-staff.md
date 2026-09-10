@@ -6,6 +6,7 @@ order: 5
 video:
   id: "1172391288"
   minutes: 5
+  title: "Enrol a staff member (Web)"
 jobaid: computer-enrol-staff.pdf
 next:
   - computer-classroom-data
