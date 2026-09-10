@@ -502,13 +502,16 @@ body {
    Verify every value with getComputedStyle in a real browser if Pagefind
    is ever upgraded — a source read isn't enough (see the file header
    comment on the search box further up).
-   Longhand padding-left/right (rather than the padding shorthand) so the
-   calc(...)-based top/bottom padding Pagefind sets from --pagefind-ui-scale
-   is left alone; only the horizontal padding is ours. */
+   Vertical padding is ours too, not just horizontal: Pagefind's own
+   calc(30px * scale) / calc(40px * scale) (20.01px / 26.68px) compounds
+   with the next result's own top padding and its inner's margin-top to
+   put 70px of dead air between one excerpt and the next title, split
+   53px/16px around the divider — loose and lopsided. 8px top/bottom here,
+   split evenly with the divider's own 16px (see .pagefind-ui__result-inner
+   below), lands on a tight, even ~32px gap instead. */
 #search .pagefind-ui__result {
   position: relative;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding: 8px 16px;
   border-top: none;
 }
 #search .pagefind-ui__result:last-of-type {
@@ -517,16 +520,27 @@ body {
 #search .pagefind-ui__result:hover {
   background: var(--page);
 }
+/* Pagefind's own margin-top: calc(10px * scale) (~6.68px) on every result's
+   inner box would otherwise add unevenly to the rhythm above; zeroed so
+   .pagefind-ui__result's own padding (above) is the only thing controlling
+   the gap before a title. */
+#search .pagefind-ui__result-inner {
+  margin-top: 0;
+}
 /* The divider between entries: Pagefind's own border-top/bottom (removed
    above) sit on the <li>, so they run the full width of the drawer,
    edge to edge, ignoring the padding just added. Putting the rule on
    .pagefind-ui__result-inner instead — which already sits inset by the
    <li>'s own left/right padding — makes it stop at the same 16px the text
    is indented by, rather than bleeding to the drawer's edges. Skipped on
-   the first result so it doesn't double up with the drawer's own border. */
+   the first result so it doesn't double up with the drawer's own border.
+   15px padding-top here (+ its own 1px border) balances the previous
+   result's 8px bottom padding plus this result's own 8px top padding
+   (16px combined) on the other side of the line, so the divider sits
+   centred in the gap rather than a third of the way down it. */
 #search .pagefind-ui__result:not(:first-of-type) .pagefind-ui__result-inner {
   border-top: 1px solid var(--line);
-  padding-top: 16px;
+  padding-top: 15px;
 }
 #search .pagefind-ui__result-title {
   font-size: 14px;
@@ -572,6 +586,15 @@ body {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--ink-muted);
+}
+/* Once there are more results than fit on one page, Pagefind renders a
+   "Load more results" button below the list with its own
+   margin-top: calc(40px * scale) (~26.68px) — the same scale-driven
+   looseness tightened for the inter-result gaps above, so it's tightened
+   here too rather than left as an odd loose gap right before the panel's
+   bottom edge. */
+#search .pagefind-ui__button {
+  margin-top: 16px;
 }
 
 /* ---- responsive header: search collapses to an icon first (<840px),

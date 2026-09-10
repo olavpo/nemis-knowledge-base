@@ -132,14 +132,22 @@ test("search results have left padding, a readable excerpt, and a site-coloured 
     await page.waitForTimeout(300);
 
     const info = await page.evaluate(() => {
-      const result = document.querySelector(".pagefind-ui__result");
+      const results = Array.from(document.querySelectorAll(".pagefind-ui__result"));
+      const result = results[0];
       const excerpt = document.querySelector(".pagefind-ui__result-excerpt");
       const mark = document.querySelector("mark");
       const cs = (el) => getComputedStyle(el);
+      const nextTitle = results[1]?.querySelector(".pagefind-ui__result-title");
       return {
         resultPaddingLeft: parseFloat(cs(result).paddingLeft),
         excerptFontSize: parseFloat(cs(excerpt).fontSize),
         markBackground: mark ? cs(mark).backgroundColor : null,
+        // The gap between one result's excerpt and the next result's title —
+        // Pagefind's own scale-driven padding made this 70px before it was
+        // tightened, so this guards against it drifting loose again.
+        excerptToNextTitleGap: nextTitle
+          ? nextTitle.getBoundingClientRect().top - excerpt.getBoundingClientRect().bottom
+          : null,
       };
     });
 
@@ -147,6 +155,10 @@ test("search results have left padding, a readable excerpt, and a site-coloured 
     assert.ok(info.excerptFontSize >= 12, `expected excerpt font-size >= 12px, got ${info.excerptFontSize}px`);
     assert.notEqual(info.markBackground, "rgb(255, 255, 0)", "mark should not use the browser-default yellow highlight");
     assert.equal(info.markBackground, "rgb(232, 244, 240)", "mark should use the site's own accent colour");
+    assert.ok(
+      info.excerptToNextTitleGap !== null && info.excerptToNextTitleGap < 36,
+      `expected a tight gap between one excerpt and the next title, got ${info.excerptToNextTitleGap}px`,
+    );
   } finally {
     await page.close();
   }
