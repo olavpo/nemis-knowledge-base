@@ -55,3 +55,50 @@ test("a guide pointing at itself is an error", () => {
   assert.equal(errors.length, 1);
   assert.match(errors[0], /itself/);
 });
+
+test("a missing title is an error", () => {
+  const { errors } = validateGuides([guide("a", { title: undefined })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*title/);
+});
+
+test("a blank title is an error", () => {
+  const { errors } = validateGuides([guide("a", { title: "   " })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*title/);
+});
+
+test("a video id that is not a Vimeo id is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { video: { id: "https://vimeo.com/123456", minutes: 4 } })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*video id/);
+});
+
+test("a missing order is an error", () => {
+  const { errors } = validateGuides([guide("a", { order: undefined })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*order/);
+});
+
+test("a non-integer order is an error", () => {
+  const { errors } = validateGuides([guide("a", { order: 8.5 })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*order/);
+});
+
+test("the same slug twice in one next list is an error", () => {
+  const { errors } = validateGuides(
+    [guide("a", { next: ["b", "b"] }), guide("b", { order: 2 })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /a\b.*\bb\b.*more than once/);
+});
+
+test("three guides sharing a section and order are all named, not just the first two", () => {
+  const { errors } = validateGuides(
+    [guide("a", { order: 2 }), guide("b", { order: 2 }), guide("c", { order: 2 })], new Set());
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /\ba\b/);
+  assert.match(errors[0], /\bb\b/);
+  assert.match(errors[0], /\bc\b/);
+});

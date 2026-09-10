@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync, mkdtempSync } from "node:fs";
+import { readFileSync, existsSync, mkdtempSync, readdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { gunzipSync } from "node:zlib";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
@@ -204,4 +205,27 @@ test("the two renamed URLs still resolve", () => {
     assert.equal($('meta[http-equiv="refresh"]').attr("content"), `0; url=${to}`);
     assert.equal($('link[rel="canonical"]').attr("href"), to);
   }
+});
+
+// Pagefind crawls _site/**/*.html on its own and does not consult Eleventy's
+// collections, so eleventyExcludeFromCollections alone does not keep the
+// redirect stubs out of the search index. A visitor searching the site must
+// never land on a result titled "Moved" whose body just says the page moved.
+// Fragment files are gzip-compressed, one per indexed page, each holding a
+// small JSON payload behind a "pagefind_dcd" marker — decompressing and
+// reading the url out of each is the direct way to prove a URL either is or
+// isn't in the index, so that's what this asserts on, rather than falling
+// back to just the page count.
+test("the redirect stubs are not in the search index", () => {
+  const fragmentDir = new URL("../_site/pagefind/fragment/", import.meta.url);
+  const files = readdirSync(fragmentDir).filter((f) => f.endsWith(".pf_fragment"));
+  const urls = files.map((f) => {
+    const json = gunzipSync(readFileSync(new URL(f, fragmentDir))).toString("utf8");
+    return JSON.parse(json.slice(json.indexOf("{"))).url;
+  });
+  for (const stub of ["/Enrol-learners-individually/", "/Enrol-an-existing-staff-member/"]) {
+    assert.ok(!urls.includes(stub), `search index contains the redirect stub ${stub}`);
+  }
+  // 12 guides + the home page; the 2 redirect stubs must not add to this.
+  assert.equal(urls.length, SLUGS.length + 1);
 });
