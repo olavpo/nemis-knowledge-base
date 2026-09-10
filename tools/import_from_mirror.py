@@ -59,12 +59,24 @@ def read_guide(path: Path, order: dict[str, int]) -> dict:
     if badge not in SECTIONS:
         raise ValueError(f"{path.name}: unknown device badge {badge!r}")
 
+    title = text_of(soup, ".page-title")
+    if not title:
+        raise ValueError(f"{path.name}: no .page-title")
+
+    body = text_of(soup, ".page-desc")
+    if not body:
+        raise ValueError(f"{path.name}: no .page-desc")
+
+    if slug not in order:
+        raise ValueError(
+            f"{slug}: not linked from the home page (missing from home.html's order)")
+
     guide = {
         "slug": slug,
-        "title": text_of(soup, ".page-title"),
+        "title": title,
         "section": SECTIONS[badge],
-        "order": order.get(slug, 99),
-        "body": text_of(soup, ".page-desc") or "",
+        "order": order[slug],
+        "body": body,
         "next": [slug_of(a["href"]) for a in soup.select("a.card")],
         "video": None,
         "jobaid": None,
@@ -104,7 +116,7 @@ def as_markdown(guide: dict) -> str:
              f"section: {guide['section']}", f"order: {guide['order']}"]
     if guide["video"]:
         minutes = guide["video"]["minutes"]
-        lines.append(f"video:")
+        lines.append("video:")
         lines.append(f"  id: \"{guide['video']['id']}\"")
         lines.append(f"  minutes: {minutes if minutes is not None else ''}".rstrip())
     if guide["jobaid"]:
