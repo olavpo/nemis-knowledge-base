@@ -1,7 +1,7 @@
 <div class="resource-block">
   <div class="resource-header">
     <span class="resource-header-label label-video">Video</span>
-    {% if video.minutes %}<span class="resource-header-meta">{{ video.minutes }} min</span>{% endif %}
+    {%- if video.minutes %}<span class="resource-header-meta">{{ video.minutes }} min</span>{% endif -%}
   </div>
   <div class="video-container">
     <iframe src="https://player.vimeo.com/video/{{ video.id }}"

@@ -228,8 +228,9 @@ test("the redirect stubs are not in the search index", () => {
   for (const stub of ["/Enrol-learners-individually/", "/Enrol-an-existing-staff-member/"]) {
     assert.ok(!urls.includes(stub), `search index contains the redirect stub ${stub}`);
   }
-  // 12 guides + the home page; the 2 redirect stubs must not add to this.
-  assert.equal(urls.length, SLUGS.length + 1);
+  // 12 guides + the home page + manuals + watch-all-videos; the 2 redirect
+  // stubs must not add to this.
+  assert.equal(urls.length, SLUGS.length + 3);
 });
 
 test("the home page lists both sections with the original copy", () => {
@@ -314,4 +315,95 @@ test("every section the validator accepts has a home page group, and vice versa"
   const { sections } = yaml.load(frontMatter);
   const homeKeys = new Set(sections.map((s) => s.key));
   assert.deepEqual(homeKeys, SECTIONS);
+});
+
+test("watch-all-videos lists every guide that has a video, and only those", () => {
+  const $ = load("watch-all-videos/index.html");
+  const cards = $(".video-card");
+  assert.equal(cards.length, 9);
+  const srcs = $(".video-card iframe").map((_, f) => $(f).attr("src")).get();
+  assert.ok(srcs.every((s) => s.startsWith("https://player.vimeo.com/video/")));
+  assert.equal(new Set(srcs).size, 9, "no video is listed twice");
+});
+
+test("each video card links to its guide", () => {
+  const $ = load("watch-all-videos/index.html");
+  const hrefs = $(".video-card .video-title a").map((_, a) => $(a).attr("href")).get();
+  assert.equal(hrefs.length, 9);
+  assert.ok(hrefs.includes("/mobile-install-login/"));
+  assert.ok(!hrefs.includes("/computer-enrol-bulk/"), "bulk enrolment has no video");
+});
+
+// The videos page must not carry the original's per-video "↓ Download"
+// links — those pointed at Google Drive, and the Drive ids are deliberately
+// not in the guide front matter. The per-guide download button (on the
+// guide page itself) is the decided download path for a video's material.
+test("the videos page has no per-video download link and no Drive URL", () => {
+  const html = read("watch-all-videos/index.html");
+  assert.ok(!html.includes("drive.google.com"), "found a Drive URL on the videos page");
+  assert.ok(!html.includes("download-link"), "found the original's download-link class");
+});
+
+test("manuals lists the handbook with a size read from the PDF", () => {
+  const $ = load("manuals/index.html");
+  assert.equal($(".card-title").text().trim(), "Handbook for States");
+  assert.equal($(".card-desc").text().trim(), "ASC & Learner Registry data entry");
+  assert.equal($("a.card").attr("href"), "/assets/pdfs/handbook-for-states.pdf");
+  assert.deepEqual($(".tag").map((_, t) => $(t).text().trim()).get()[0], "PDF");
+  assert.match($(".tag-size").text(), /^\d+(\.\d)? (KB|MB)$/);
+  // 12 pages, 864 KB — verified against the committed PDF, same discipline as
+  // JOB_AID_META above: this is a literal value, not a format check.
+  assert.equal($(".tag-size").text().trim(), "864 KB");
+});
+
+// cheerio recovers elements by selector no matter how broken the underlying
+// tree is, so — exactly as with the home page's no-video cards — a
+// cheerio-based assertion here cannot tell a stray <p> apart from valid
+// markup. Both new pages are Markdown files whose loops wrap Nunjucks
+// output that markdown-it re-parses, so this checks the raw bytes directly.
+test("video and manual cards on the new pages render as valid HTML, not through markdown-it's paragraph fallback", () => {
+  const videosHtml = read("watch-all-videos/index.html");
+  const manualsHtml = read("manuals/index.html");
+
+  for (const [label, html] of [["watch-all-videos", videosHtml], ["manuals", manualsHtml]]) {
+    assert.ok(!html.includes("</div></p>"),
+      `${label} contains a </div></p> sequence — markdown-it broke out of a raw HTML block`);
+  }
+
+  // No <p> anywhere inside a video card, a video-info block, a manual card,
+  // or a card-tags block.
+  const videoCardStarts = [...videosHtml.matchAll(/<div class="video-card">/g)].map((m) => m.index);
+  assert.equal(videoCardStarts.length, 9);
+  for (const start of videoCardStarts) {
+    const infoOpen = videosHtml.indexOf('<div class="video-info">', start);
+    const infoClose = videosHtml.indexOf("</div>", infoOpen);
+    const between = videosHtml.slice(infoOpen, infoClose);
+    assert.ok(!between.includes("<p>"), `video-info contains a stray <p>: ${between}`);
+  }
+
+  const cardOpen = manualsHtml.indexOf('<a class="card"');
+  assert.ok(cardOpen !== -1, "manual card not found");
+  const tagsOpen = manualsHtml.indexOf('<div class="card-tags">', cardOpen);
+  const tagsClose = manualsHtml.indexOf("</div>", tagsOpen);
+  const tagsBetween = manualsHtml.slice(tagsOpen, tagsClose);
+  assert.ok(!tagsBetween.includes("<p>"), `manuals .card-tags contains a stray <p>: ${tagsBetween}`);
+});
+
+// Deferred from Task 6 (see that task's report, ruling 2): the home page's
+// nav links to /manuals/ and /watch-all-videos/, which did not exist until
+// this task built them, so this could only be written once both pages were
+// in place.
+test("no page links to a URL that was not built", () => {
+  const pages = [...SLUGS.map((s) => `${s}/index.html`),
+                 "index.html", "manuals/index.html", "watch-all-videos/index.html"];
+  for (const page of pages) {
+    const $ = load(page);
+    for (const href of $("a[href^='/']").map((_, a) => $(a).attr("href")).get()) {
+      const target = href.endsWith("/") ? `${href}index.html`
+        : href.endsWith(".pdf") ? href
+        : `${href}/index.html`;
+      assert.ok(existsSync(new URL(`../_site${target}`, import.meta.url)),
+        `${page} links to ${href}, which was not built`);
+    }
+  }
 });
