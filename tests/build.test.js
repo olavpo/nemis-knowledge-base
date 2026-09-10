@@ -72,6 +72,27 @@ const SLUGS = [
   "computer-change-password",
 ];
 
+// Expected page counts and sizes, verified against the PDFs committed at
+// assets/pdfs/. These are literal values, not formats: a bug that reports
+// the same page count for every job aid would still satisfy a format regex,
+// which is exactly the failure this task exists to prevent. Replacing a PDF
+// means updating this table — if the build test fails because of a value
+// here, that's the test doing its job, not a bug in the test.
+const JOB_AID_META = {
+  "mobile-install-login": { pages: 2, size: "1.3 MB" },
+  "mobile-enrol-individually": { pages: 2, size: "1.8 MB" },
+  "mobile-enrol-staff": { pages: 2, size: "989 KB" },
+  "mobile-classroom-data": { pages: 2, size: "1.8 MB" },
+  "computer-login-navigate": { pages: 1, size: "1.5 MB" },
+  "computer-census-data": { pages: 1, size: "1.3 MB" },
+  "computer-enrol-individually": { pages: 1, size: "1.1 MB" },
+  "computer-enrol-bulk": { pages: 3, size: "1.6 MB" },
+  "computer-enrol-staff": { pages: 3, size: "1.3 MB" },
+  "computer-enrol-existing-staff": { pages: 2, size: "1.2 MB" },
+  "computer-classroom-data": { pages: 1, size: "1.1 MB" },
+  "computer-change-password": { pages: 1, size: "966 KB" },
+};
+
 test("every guide page is built at its own URL", () => {
   for (const slug of SLUGS) {
     assert.ok(existsSync(new URL(`../_site/${slug}/index.html`, import.meta.url)),
@@ -158,5 +179,17 @@ test("every guide that has a job aid shows a size and a page count", () => {
       /PDF · \d+ page/, `${slug} has no page count`);
     assert.match($(".download-hint").text(),
       /· \d+(\.\d)? (KB|MB)$/, `${slug} has no file size`);
+  }
+});
+
+test("each job aid's page count and size match the committed PDF exactly", () => {
+  for (const slug of SLUGS) {
+    const { pages, size } = JOB_AID_META[slug];
+    const $ = load(`${slug}/index.html`);
+    const expectedMeta = `PDF · ${pages} page${pages !== 1 ? "s" : ""}`;
+    assert.equal($(".resource-header-meta").last().text().trim(), expectedMeta,
+      `${slug} header meta`);
+    assert.ok($(".download-hint").text().trim().endsWith(`· ${size}`),
+      `${slug} download hint expected to end with "· ${size}", got "${$(".download-hint").text().trim()}"`);
   }
 });
