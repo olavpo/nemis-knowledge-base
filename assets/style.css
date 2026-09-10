@@ -322,11 +322,20 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
+/* Flex column, with .video-info below stretched to fill (flex: 1) and
+   itself a flex column: the grid already stretches every .video-card in a
+   row to equal height, but without this their *contents* just sat at the
+   top, so the download link landed 38px above the card bottom for a
+   one-line title and 17px for a two-line one — different places depending
+   on title length. margin-top: auto on .download-link (further down)
+   pushes it to the bottom of .video-info at the same offset regardless. */
 .video-card {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .video-wrapper {
   position: relative;
@@ -342,6 +351,9 @@ body {
 }
 .video-info {
   padding: 12px 14px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .video-title-row {
   display: flex;
@@ -369,6 +381,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  margin-top: auto;
+  align-self: flex-start;
 }
 .download-link:hover { text-decoration: underline; }
 
