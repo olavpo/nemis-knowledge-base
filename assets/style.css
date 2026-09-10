@@ -326,6 +326,10 @@ body {
    an oversight. The same is true of the clear button, which also reads
    --pagefind-ui-text rather than --ink-muted. */
 .site-search {
+  /* Positioning context for the results drawer below (#search
+     .pagefind-ui__drawer) so it floats over the page instead of pushing it
+     down. */
+  position: relative;
   flex: 1 1 260px;
   max-width: 260px;
   min-width: 160px;
@@ -361,3 +365,47 @@ body {
    Pagefind is ever upgraded — the id-based specificity is what matters here,
    not this literal selector string. */
 #search .pagefind-ui__search-clear { font-size: 12px; }
+
+/* The results drawer (.pagefind-ui__drawer) renders inside #search in
+   normal flow by default, so typing a query grows the header itself and
+   shoves the hero and all page content down with it — confirmed in a
+   browser: 68px -> 733px, a 665px shove. Floated as an absolutely
+   positioned dropdown instead, anchored to #search (position: relative
+   above). Same specificity trick as .pagefind-ui__search-clear above:
+   #search .pagefind-ui__drawer is (1,1,0), which beats Pagefind's own
+   .pagefind-ui__drawer.svelte-xxxxx at (0,2,0) regardless of stylesheet
+   load order, without needing !important. Verify every value here with
+   getComputedStyle in a real browser if Pagefind is ever upgraded — see
+   the file header comment on the search box above for why a source read
+   isn't enough. */
+#search .pagefind-ui__drawer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  min-width: 360px;
+  max-width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  z-index: 40;
+}
+
+/* Below 600px, the right-aligned, 360px-min-width layout above stops being
+   a narrow column pinned to one edge of a small input and starts risking
+   overflow on a genuinely narrow screen instead — so it switches to
+   full-bleed, pinned to the search field's own edges with a small gutter,
+   rather than a fixed min-width. (Independent of the search-field-collapses-
+   to-an-icon rule further down: this fires at any width under 600px
+   regardless of whether #search itself is inline or collapsed.) */
+@media (max-width: 599px) {
+  #search .pagefind-ui__drawer {
+    left: 8px;
+    right: 8px;
+    min-width: 0;
+    max-width: none;
+  }
+}
