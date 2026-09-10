@@ -7,6 +7,7 @@ video:
   id: "1172389199"
   minutes: 4
   download: 1yl8KG9yX6kr1eJQf4Upjz0wAoWL6gX8A
+  gridDownload: 1M1SHBMHdxd9LjB9w1KZUmsFGh0JwtdD0
 jobaid: mobile-install-login.pdf
 next:
   - mobile-enrol-individually

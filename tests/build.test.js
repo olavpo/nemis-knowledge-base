@@ -392,14 +392,41 @@ test("video card titles match the original's disambiguated wording, in order", (
   ]);
 });
 
-// The videos page must not carry the original's per-video "↓ Download"
-// links — those pointed at Google Drive, and the Drive ids are deliberately
-// not in the guide front matter. The per-guide download button (on the
-// guide page itself) is the decided download path for a video's material.
-test("the videos page has no per-video download link and no Drive URL", () => {
-  const html = read("watch-all-videos/index.html");
-  assert.ok(!html.includes("drive.google.com"), "found a Drive URL on the videos page");
-  assert.ok(!html.includes("download-link"), "found the original's download-link class");
+// The videos page must carry the original's per-video "↓ Download" links —
+// the user was asked directly how video downloads should work and chose
+// "Keep the Google Drive links". These are nine different Drive files from
+// the ones already on the guide pages (video.gridDownload, not
+// video.download), one per card, in the same order the cards render.
+//
+// computer-enrol-individually is normalised to the uc?export=download form
+// here even though the original's link for that one card was a
+// /file/d/<id>/view URL (which opens a Drive preview, not a download,
+// despite the button saying "Download") — the same class of bug already
+// corrected elsewhere in this project, not reproduced.
+test("the videos page has its nine per-video download links, in card order", () => {
+  const $ = load("watch-all-videos/index.html");
+  const links = $(".video-card a.download-link");
+  const expectedIds = [
+    "1M1SHBMHdxd9LjB9w1KZUmsFGh0JwtdD0",
+    "1K6rFtQ0HR2uoyVn27CmIrtGcz3HYgeNU",
+    "1kv0f7f731WN76lhqF9jk4oMK43fO41eS",
+    "1IJ6PLy1wRrFDJUqqxBXTEJSIc-T-4cPc",
+    "1g5UUNAndvFdSLkY0CsopBs0hnlD0XbmU",
+    "1N2bfEXItp-GJ3W1p4gokUNlHHd6GCGqX",
+    "1n-eG65tICyR2bHnopzU3pr48cwnugRI3",
+    "1TMq2h4loY7rJY2rnFDjTczjpQCDlANG5",
+    "1jthp-QbguH2tfa3F_eWy5IJgIptosdbS",
+  ];
+  assert.equal(links.length, 9);
+  assert.deepEqual(
+    links.map((_, a) => $(a).attr("href")).get(),
+    expectedIds.map((id) => `https://drive.google.com/uc?export=download&id=${id}`),
+  );
+  links.each((_, a) => {
+    assert.equal($(a).attr("target"), "_blank");
+    assert.equal($(a).attr("rel"), "noopener");
+    assert.equal($(a).text().trim(), "↓ Download");
+  });
 });
 
 test("manuals lists the handbook with a size read from the PDF", () => {
@@ -469,6 +496,31 @@ test("no page links to a URL that was not built", () => {
 test("the search index is built and covers every page", () => {
   assert.ok(existsSync(new URL("../_site/pagefind/pagefind.js", import.meta.url)),
     "pagefind did not run — check the build script");
+});
+
+// .site-main caps at 900px with 24px of padding on each side, so the video
+// grid's content box never exceeds 852px. The original used a fixed
+// repeat(3, 1fr); this rebuild uses auto-fill/minmax, which only reaches
+// three columns if the minimum track width actually leaves room for three of
+// them (plus two 20px gaps) inside that 852px box — 280px didn't (needed
+// 880px), so nine videos could only ever render in fewer columns, no matter
+// how wide the browser window was. This checks the arithmetic directly
+// rather than rendering the page, since no DOM/CSS engine runs in this test
+// suite; a real browser check at 1200px and 400px is documented in the fix
+// report.
+test("the video grid's minimum track width actually allows three columns at desktop width", () => {
+  const css = read("assets/style.css");
+  const rule = css.match(/\.grid\s*\{([^}]*)\}/s);
+  assert.ok(rule, ".grid rule not found in the built stylesheet");
+  const minmax = rule[1].match(/minmax\((\d+)px,\s*1fr\)/);
+  assert.ok(minmax, ".grid does not use minmax(<n>px, 1fr) for its columns");
+  const gapMatch = rule[1].match(/gap:\s*(\d+)px/);
+  assert.ok(gapMatch, ".grid does not declare a pixel gap");
+  const track = Number(minmax[1]);
+  const gap = Number(gapMatch[1]);
+  const CONTENT_BOX = 900 - 2 * 24; // .site-main max-width minus its own side padding
+  assert.ok(3 * track + 2 * gap <= CONTENT_BOX,
+    `three ${track}px tracks with ${gap}px gaps (${3 * track + 2 * gap}px) don't fit in the ${CONTENT_BOX}px content box`);
 });
 
 test("the search UI is on every page", () => {

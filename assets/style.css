@@ -224,9 +224,17 @@ body {
 .section-icon { vertical-align: -3px; margin-right: 6px; }
 
 /* ---- video grid ---- */
+/* The original used a fixed repeat(3, 1fr) collapsing to one column below
+   700px. This site's content box tops out at 852px (900px .site-main minus
+   its 24px side padding), and three 280px tracks plus two 20px gaps need
+   880px — one column short of ever reaching three across, at any width.
+   260px (3 * 260 + 2 * 20 = 820px, fits within 852px) restores three columns
+   at desktop width while auto-fill still collapses gracefully to fewer
+   columns, and eventually one, as the viewport narrows — no media query
+   needed for that part. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
 .video-card {
@@ -248,16 +256,36 @@ body {
   border: none;
 }
 .video-info {
+  padding: 12px 14px 14px;
+}
+.video-title-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 14px;
+  margin-bottom: 8px;
 }
 .video-title { font-size: 14px; font-weight: 600; }
 .video-title a { color: inherit; text-decoration: none; }
 .video-title a:hover { color: var(--green); }
 .video-meta { font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+
+/* Ported from docs/source-embeds/watch-all-videos.html verbatim (colour:
+   var(--green) there is a literal #2d6a4f, same value the token already
+   holds). The per-video Drive fallback restored per the user's explicit
+   choice — see tests/build.test.js's "the videos page has its nine
+   per-video download links" for why these exist and lib/validate.js's
+   video.gridDownload check for the field they come from. */
+.download-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.download-link:hover { text-decoration: underline; }
 
 /* Search — new UI added by Pagefind, no counterpart in the original site's
    Google-powered search widget; see tests/css-fidelity.test.js's

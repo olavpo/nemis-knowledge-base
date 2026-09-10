@@ -16,8 +16,11 @@ hero:
       <iframe src="https://player.vimeo.com/video/{{ guide.data.video.id }}" title="{{ gridTitle }}" allowfullscreen></iframe>
     </div>
     <div class="video-info">
-      <div class="video-title"><a href="{{ guide.url | url }}">{{ gridTitle }}</a></div>
-      {%- if guide.data.video.minutes %}<span class="video-meta">{{ guide.data.video.minutes }} min</span>{% endif -%}
+      <div class="video-title-row">
+        <div class="video-title"><a href="{{ guide.url | url }}">{{ gridTitle }}</a></div>
+        {%- if guide.data.video.minutes %}<span class="video-meta">{{ guide.data.video.minutes }} min</span>{% endif -%}
+      </div>
+      {%- if guide.data.video.gridDownload %}<a class="download-link" href="https://drive.google.com/uc?export=download&id={{ guide.data.video.gridDownload }}" target="_blank" rel="noopener">&darr; Download</a>{% endif -%}
     </div>
   </div>
   {%- endif -%}
