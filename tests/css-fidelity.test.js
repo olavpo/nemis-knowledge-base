@@ -32,6 +32,15 @@ const readEmbed = (file) => readFileSync(new URL(file, EMBEDS_DIR), "utf8");
 // whose *page* actually renders that selector in this project today; the
 // comment on that entry says which embeds disagreed and why the pick.
 const CSS_FIDELITY_MAP = {
+  // mobile-install-login.html: base page chrome shared by every page in the
+  // original site. manuals.html's own `body` rule uses a different
+  // background (#fff4d6, a cream tone specific to that page) instead of the
+  // #f4f6f4 every guide embed and home.html agree on — a real, page-specific
+  // choice in the original, not a mistake. The guide-page value is what's
+  // shipped today; whoever builds the manuals page needs #fff4d6 there, not
+  // this value.
+  "body": "mobile-install-login.html",
+
   // manuals.html: the only embed that defines these (the plan's Step 7
   // mis-credited them to mobile-install-login.html/home.html, which don't
   // have them at all).
@@ -50,8 +59,18 @@ const CSS_FIDELITY_MAP = {
   ".label-video": "mobile-install-login.html",
   ".label-jobaid": "mobile-install-login.html",
   ".resource-header-meta": "mobile-install-login.html",
+  ".resource-header": "mobile-install-login.html",
+  ".video-container": "mobile-install-login.html",
+  ".card-arrow": "mobile-install-login.html",
   ".download-btn": "mobile-install-login.html",
+  ".download-btn:hover": "mobile-install-login.html",
   ".download-hint": "mobile-install-login.html",
+
+  // computer-change-password.html: a guide embed, picked (over other guide
+  // embeds that define the same rule identically) simply because it's the
+  // one guide with no video, so its job-aid-only .pdf-container is the
+  // plainest example.
+  ".pdf-container": "computer-change-password.html",
 
   // .divider is not in the coordinator's original list, but it has a real
   // colour conflict: every guide embed (including mobile-install-login.html)
@@ -63,22 +82,52 @@ const CSS_FIDELITY_MAP = {
   ".divider": "mobile-install-login.html",
 
   // home.html: shared card chrome, and the future homepage section headers.
+  //
   // .section-label has a real colour conflict: home.html and index.html
   // (its duplicate) both use #2d6a4f, but manuals.html's own .section-label
-  // uses #007d53 instead — a different, manuals-page-only green that isn't
-  // tokenised anywhere in this project yet. No template renders
-  // .section-label today; home.html is picked because it's the page whose
-  // sections ("Mobile phone" / "Computer or laptop") this class was written
-  // for. Whoever builds the manuals page should re-check this against
-  // manuals.html's #007d53 before shipping it.
+  // uses #007d53 instead. This is a genuine inconsistency in the original
+  // site, and the project has decided to unify on #2d6a4f (the value
+  // already tokenised as --green and used everywhere else). home.html is
+  // therefore the CORRECT, deliberate mapping — do not "fix" this to
+  // manuals.html's #007d53 in a future task; that would undo the decision,
+  // not restore fidelity.
   ".section-label": "home.html",
   ".section-title": "home.html",
   ".section-desc": "home.html",
   ".card": "home.html",
+  // .card:hover also covers .card:focus-visible's shared declaration in the
+  // shipped rule (`.card:hover,\n.card:focus-visible { border-color: ... }`).
+  // Same conflict as .section-label: manuals.html's own .card:hover/
+  // :focus-visible use #007d53, every other embed (including home.html and
+  // every guide) uses #2d6a4f. Picking the guide/home value for the same
+  // reason as above.
+  ".card:hover": "mobile-install-login.html",
   ".card-title": "home.html",
   ".tag-video": "home.html",
   ".tag-jobaid": "home.html",
 };
+
+// Selectors deliberately left out of the map above, and why. This list is
+// what tells the next person "we checked and decided", not "we forgot" —
+// keep it in sync whenever a selector is added to or removed from
+// assets/style.css.
+//
+// 1. Site chrome — new work for this rebuild, not scraped from Google
+//    Sites (the live site's header/nav/hero/footer were Google Sites' own
+//    chrome, never present in any of the page-content embeds this project
+//    captured): .site-header, .site-brand, .site-logo, .site-title,
+//    .site-nav, .site-nav a, .site-nav a:hover,
+//    .site-nav a[aria-current="page"], .hero, .hero-title, .hero-subtitle,
+//    .site-main, .site-footer.
+// 2. .card:focus-visible — an accessibility addition this rebuild made.
+//    It isn't defined at all in the two sources the rest of .card/.card:hover
+//    are checked against (home.html, the guide embeds); only manuals.html
+//    defines it, with the same #007d53 this project has decided not to
+//    follow for cards (see the .card:hover comment above) — so there's no
+//    value here worth pinning against a source this project doesn't
+//    otherwise use for card colour.
+// 3. .video-container iframe, .pdf-container iframe — both only declare
+//    `border: none`. No concrete colour value on either side to compare.
 
 // Only these count as "colour-bearing": color, background(-color), and any
 // border* shorthand/longhand (border, border-color, border-top, ...) — the
@@ -89,8 +138,13 @@ const COLOR_TOKEN_RE = /#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/i;
 function extractRule(css, selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   // Negative lookahead stops ".card" from matching ".card-title" or
-  // ".card:hover" — only a real word/selector boundary counts.
-  const re = new RegExp(`${escaped}(?![\\w:-])\\s*\\{([^}]*)\\}`, "s");
+  // ".card:hover" — only a real word/selector boundary counts. The optional
+  // `(?:,[^{]*)?` lets the selector be the first (or only) name in a
+  // comma-separated list before the brace, e.g. shipped CSS's
+  // ".card:hover,\n.card:focus-visible {" — needed so ".card:hover" can be
+  // found and checked even though it isn't written as its own standalone
+  // rule.
+  const re = new RegExp(`${escaped}(?![\\w:-])\\s*(?:,[^{]*)?\\{([^}]*)\\}`, "s");
   const m = css.match(re);
   return m ? m[1] : null;
 }
