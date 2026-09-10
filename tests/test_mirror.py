@@ -67,9 +67,18 @@ def main():
         print("\nChecks:")
         # --- pages ---------------------------------------------------------- #
         for rel in ("index.html", "page-a/index.html",
-                    "page-a/child/index.html", "page-b/index.html"):
+                    "page-a/child/index.html", "page-b/index.html",
+                    "page-c/index.html"):
             check((out / rel).is_file(), f"page written: {rel}")
-        check(len(mirror.pages) == 4, f"crawled exactly 4 pages (got {len(mirror.pages)})")
+        check(len(mirror.pages) == 5, f"crawled exactly 5 pages (got {len(mirror.pages)})")
+
+        # page-c is linked only from inside a data-code embed, where a scan for
+        # <a> elements cannot see it.
+        check("Reachable only from a card" in
+              (out / "page-c" / "index.html").read_text(encoding="utf-8"),
+              "page linked only from an embedded HTML block is crawled")
+        check(f"http://127.0.0.1:{port}/view/testsite/page-c" in mirror.embedded_pages,
+              "embedded-only page recorded in embedded_pages")
 
         home = (out / "index.html").read_text(encoding="utf-8")
         child = (out / "page-a" / "child" / "index.html").read_text(encoding="utf-8")
@@ -125,9 +134,9 @@ def main():
         for rel in ("search-index.json", "selfhost-search.js", "selfhost-search.css"):
             check((out / rel).is_file(), f"search asset written: {rel}")
         index = json.loads((out / "search-index.json").read_text(encoding="utf-8"))
-        check(len(index) == 4, f"search index has 4 pages (got {len(index)})")
+        check(len(index) == 5, f"search index has 5 pages (got {len(index)})")
         urls = {d["url"] for d in index}
-        check(urls == {"/", "/page-a/", "/page-a/child/", "/page-b/"},
+        check(urls == {"/", "/page-a/", "/page-a/child/", "/page-b/", "/page-c/"},
               f"search index URLs correct (got {sorted(urls)})")
         entry = next(d for d in index if d["url"] == "/page-b/")
         check("dashboards" in entry["text"], "search index captured page text")

@@ -98,6 +98,11 @@ URL_ATTRS = [
     ("object", "data"),
     ("input", "src"),
 ]
+# Attributes in which Google Sites stores an embedded HTML block as escaped
+# markup. Links inside these are invisible to a scan for <a> elements.
+EMBED_ATTRS = ("data-code", "srcdoc")
+EMBED_HREF_RE = re.compile(r"""href=["']([^"']+)["']""")
+
 SRCSET_ATTRS = [
     ("img", "srcset"),
     ("img", "data-srcset"),
@@ -186,6 +191,7 @@ class Mirror:
     failures: list[tuple[str, str]] = field(default_factory=list)
     remote_links: set[str] = field(default_factory=set)
     embeds: set[str] = field(default_factory=set)
+    embedded_pages: set[str] = field(default_factory=set)
     titles: dict[str, str] = field(default_factory=dict)
     extra_hosts: set[str] = field(default_factory=set)
     extra_urls: list[str] = field(default_factory=list)
@@ -336,10 +342,40 @@ class Mirror:
 
     # -- HTML rewriting ----------------------------------------------------- #
 
+    def queue_embedded_pages(self, soup: BeautifulSoup, page_url: str,
+                             queue: deque) -> None:
+        """Queue site pages linked from inside embedded HTML blocks.
+
+        The markup is only discovered, not rewritten: the block is rendered in
+        an iframe with its own base URL, so a relative path written here would
+        not resolve. Those links keep pointing at the original site.
+        """
+        for attr in EMBED_ATTRS:
+            for tag in soup.find_all(attrs={attr: True}):
+                markup = tag.get(attr) or ""
+                if "<" not in markup:
+                    continue
+                for href in EMBED_HREF_RE.findall(markup):
+                    absolute = urljoin(page_url, href.strip())
+                    if not is_http(absolute):
+                        continue
+                    target_url = normalise_page_url(urldefrag(absolute)[0])
+                    if not self.is_site_page(target_url):
+                        continue
+                    if target_url in self.pages or target_url in queue:
+                        continue
+                    self.embedded_pages.add(target_url)
+                    queue.append(target_url)
+
     def rewrite_page(self, soup: BeautifulSoup, page_url: str, page_file: Path,
                      queue: deque, options: argparse.Namespace) -> None:
         for tag in soup.find_all("base"):
             tag.decompose()
+
+        # Pages linked only from inside embedded HTML gadgets. Google Sites
+        # stores those blocks as escaped markup in an attribute rather than as
+        # real elements, so the anchor scan below never sees them.
+        self.queue_embedded_pages(soup, page_url, queue)
 
         # Links between pages of the site.
         for anchor in soup.find_all("a", href=True):
@@ -586,6 +622,19 @@ class Mirror:
         ]
         for url, path in sorted(self.pages.items(), key=lambda kv: str(kv[1])):
             lines.append(f"- `{path.parent.as_posix()}/` — {self.titles.get(url, '')}")
+
+        if self.embedded_pages:
+            lines += [
+                "",
+                "## Pages found only inside embedded HTML blocks",
+                "",
+                "These are not linked from the site menu or from any ordinary",
+                "link. Links to them inside the embedded block still point at",
+                "the original site.",
+                "",
+            ]
+            for url in sorted(self.embedded_pages):
+                lines.append(f"- <{url}>")
 
         if self.embeds:
             lines += [
