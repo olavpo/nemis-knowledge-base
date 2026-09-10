@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% if title and title != site.title %}{{ site.title }} - {{ title }}{% else %}{{ site.title }}{% endif %}</title>
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="{{ '/assets/style.css' | url }}">
 </head>
 <body>
 
 <header class="site-header">
-  <a class="site-brand" href="/">
-    <img class="site-logo" src="{{ site.logo }}" alt="{{ site.logoAlt }}">
+  <a class="site-brand" href="{{ '/' | url }}">
+    <img class="site-logo" src="{{ site.logo | url }}" alt="{{ site.logoAlt }}">
     <span class="site-title">{{ site.title }}</span>
   </a>
   <nav class="site-nav">
     {% for item in site.nav %}
-    <a href="{{ item.url }}"{% if item.url == page.url %} aria-current="page"{% endif %}>{{ item.text }}</a>
+    <a href="{{ item.url | url }}"{% if item.url == page.url %} aria-current="page"{% endif %}>{{ item.text }}</a>
     {% endfor %}
   </nav>
 </header>

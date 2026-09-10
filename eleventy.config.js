@@ -3,7 +3,6 @@ import yaml from "js-yaml";
 export default function (eleventyConfig) {
   eleventyConfig.addDataExtension("yaml", (contents) => yaml.load(contents));
   eleventyConfig.addPassthroughCopy({ assets: "assets" });
-  eleventyConfig.setLiquidOptions({ jsTruthy: true });
 
   return {
     dir: {
