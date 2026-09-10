@@ -94,7 +94,7 @@ body {
 }
 .card-text { flex: 1; }
 .card-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
-.card-desc { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: #666; margin-bottom: 6px; }
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-arrow { font-size: 20px; color: #aaa; margin-left: 12px; line-height: 1; }
 
@@ -107,8 +107,8 @@ body {
 }
 .tag-video { background: #e8f4f0; color: #1e5c3e; }
 .tag-jobaid { background: #f0f4ff; color: #3a5aad; }
-.tag-pdf { background: #fdecea; color: #b03027; }
-.tag-size { background: #f1f1f1; color: #666; }
+.tag-pdf { background: #fde8e8; color: #8a2a2a; }
+.tag-size { background: #eee; color: #555; }
 
 .divider { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
 

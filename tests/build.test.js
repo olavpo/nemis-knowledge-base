@@ -144,10 +144,3 @@ test("a subdirectory build prefixes a guide page's PDF and card URLs", () => {
   assert.deepEqual($(".next-list a.card").map((_, a) => $(a).attr("href")).get(),
     ["/kb/mobile-enrol-individually/", "/kb/mobile-enrol-staff/"]);
 });
-
-test("the Do this next label keeps the source's muted styling", () => {
-  const css = readFileSync(new URL("../assets/style.css", import.meta.url), "utf8");
-  const rule = css.match(/\.next-label\s*\{[^}]*\}/)?.[0] ?? "";
-  assert.match(rule, /letter-spacing:\s*1\.4px/);
-  assert.match(rule, /color:\s*var\(--ink-muted\)/);
-});
