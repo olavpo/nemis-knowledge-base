@@ -123,12 +123,20 @@ for (const width of ONE_ROW_WIDTHS) {
 test("at >=840px the search input is visible and the toggles are not", async () => {
   const page = await newPage(900);
   try {
-    const state = await page.evaluate(() => ({
-      search: getComputedStyle(document.getElementById("search")).display,
-      navToggle: getComputedStyle(document.getElementById("nav-toggle")).display,
-      searchToggle: getComputedStyle(document.getElementById("search-toggle")).display,
-    }));
-    assert.notEqual(state.search, "none");
+    // Check the actual input Pagefind constructs, not just its container —
+    // #search being visible doesn't by itself prove the input inside it is
+    // (see the no-JS test's comment for why that distinction matters here).
+    await page.waitForSelector(".pagefind-ui__search-input", { timeout: 10000 });
+    const state = await page.evaluate(() => {
+      const input = document.querySelector(".pagefind-ui__search-input");
+      const rect = input?.getBoundingClientRect();
+      return {
+        inputVisible: !!rect && rect.width > 0 && rect.height > 0,
+        navToggle: getComputedStyle(document.getElementById("nav-toggle")).display,
+        searchToggle: getComputedStyle(document.getElementById("search-toggle")).display,
+      };
+    });
+    assert.ok(state.inputVisible, "the actual Pagefind search input should be visible, not just its container");
     assert.equal(state.navToggle, "none");
     assert.equal(state.searchToggle, "none");
   } finally {
@@ -200,11 +208,21 @@ test("at 400px the hamburger is present and nav links are hidden until it opens,
   }
 });
 
-test("at 400px with JavaScript disabled, nav links and the search input are still reachable and neither toggle renders", async () => {
+test("with JavaScript disabled at 400px the nav is reachable and no dead controls render", async () => {
   // The <noscript> fallback in base.njk's <head> is the only thing standing
-  // between "script fails to load on a phone" and "no way to navigate or
-  // search" — this is the one test that actually exercises it, by disabling
-  // scripting in a fresh browser context rather than just reading the CSS.
+  // between "script fails to load on a phone" and "no way to navigate" —
+  // this is the one test that actually exercises it, by disabling scripting
+  // in a fresh browser context rather than just reading the CSS.
+  //
+  // Search is deliberately NOT asserted as reachable here: Pagefind builds
+  // its entire UI (the input, the clear button, the drawer) client-side via
+  // `new PagefindUI(...)`, so with scripting off #search never gets an
+  // input in the first place — no <noscript> CSS can reveal a control that
+  // was never constructed. That matches the original Google Site, whose own
+  // search also needed JavaScript, so nothing is lost relative to what this
+  // replaced (see the README). What this test guards is that #search stays
+  // empty and inert rather than rendering, e.g., a placeholder that looks
+  // like a working search box but isn't.
   const { context, page } = await newNoScriptPage(400);
   try {
     const info = await page.evaluate(() => {
@@ -213,14 +231,14 @@ test("at 400px with JavaScript disabled, nav links and the search input are stil
       return {
         navDisplay: getComputedStyle(nav).display,
         linksVisible: Array.from(nav.querySelectorAll("a")).map((a) => a.getBoundingClientRect().width > 0),
-        searchDisplay: getComputedStyle(search).display,
+        searchChildCount: search.children.length,
         navToggleDisplay: getComputedStyle(document.getElementById("nav-toggle")).display,
         searchToggleDisplay: getComputedStyle(document.getElementById("search-toggle")).display,
       };
     });
     assert.notEqual(info.navDisplay, "none", "nav should be visible with no JS");
     assert.deepEqual(info.linksVisible, [true, true, true], "all three nav links should be visible with no JS");
-    assert.notEqual(info.searchDisplay, "none", "the search field should be visible with no JS");
+    assert.equal(info.searchChildCount, 0, "search is Pagefind's own client-side UI — expected empty with no JS, not a defect");
     assert.equal(info.navToggleDisplay, "none", "the hamburger can't do anything with no JS, so it must not render");
     assert.equal(info.searchToggleDisplay, "none", "the search icon can't do anything with no JS, so it must not render");
 

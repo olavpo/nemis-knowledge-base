@@ -138,6 +138,20 @@ of `assets/style.css`. `npm test` includes browser-driven tests for this
 locally served copy of `_site/` — if Chromium isn't installed yet, run
 `npx playwright install chromium` once first.
 
+If a visitor's browser never runs that script — a dropped connection, a
+slow phone, a filter that blocks it — a `<noscript>` block in
+`_includes/base.njk`'s `<head>` reverts the header below 840px to a plain,
+always-visible layout instead of leaving the collapsed nav or search icon
+inert: **navigation degrades gracefully and every nav link stays reachable
+without JavaScript.** Search does not, and cannot: Pagefind builds its
+entire search UI — the input, the clear button, the results — client-side
+via `new PagefindUI(...)`, so with no script there is no input for any CSS
+to reveal. That is not a regression relative to what this replaced — the original
+Google Site depended on Google's own JavaScript to render *any* content, its
+search widget included (see "Where this came from" below for how thoroughly
+true that was of the whole site) — but a reader should not come away
+thinking search works here with scripting off.
+
 `playwright` is pinned to an exact version (`1.62.0`, not `^1.62.0`) rather
 than left as a range, because that version's expected Chromium build has to
 match whatever Chromium revision is actually installed wherever the tests
