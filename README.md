@@ -51,7 +51,7 @@ else, here is what each front-matter field does:
 | `title` | The page heading, and the text shown on the guide's card. |
 | `section` | `mobile` or `computer` — which group the guide appears under on the home page. No other value is allowed. |
 | `order` | A whole number that sets the guide's position within its section (lower numbers come first). Two guides in the same section can't share a number. |
-| `video` | Optional. If present, embeds a Vimeo video. `id` is the numeric Vimeo id (digits only — copy it from the Vimeo share link). `minutes` is the video's length, shown as a badge. `title` is optional and only needed if this guide's plain `title` would otherwise be identical to another guide's on the "Watch all videos" page — it overrides the heading shown there. `download` is optional: a Google Drive file id (not a full URL) for that same video, which adds a "Save for offline use?" download link below the player — see "The Vimeo and Drive dependencies" below. |
+| `video` | Optional. If present, embeds a Vimeo video. `id` is the numeric Vimeo id (digits only — copy it from the Vimeo share link). `minutes` is the video's length, shown as a badge. `title` is optional and only needed if this guide's plain `title` would otherwise be identical to another guide's on the "Watch all videos" page — it overrides the heading shown there. `download` is optional: a Google Drive file id (not a full URL) for that same video, which adds a "Save for offline use?" download link below the player on the guide's own page — see "The Vimeo and Drive dependencies" below. `gridDownload` is also optional and is a *different* Drive file id for the same video: it powers that video's own "↓ Download" link on the "Watch all videos" page, separately from `download` above. |
 | `jobaid` | Optional. The filename of a PDF already sitting in `assets/pdfs/`. It's shown embedded on the page with a download button. |
 | `next` | Optional. A list of other guides' filenames (without `.md`) to show as "Do this next" cards at the bottom of the page. |
 
@@ -114,8 +114,11 @@ npm test          # builds the whole site and runs the automated checks
 
 `npm start` is for quick previews: it rebuilds instantly as you edit, but it
 does **not** run the search indexer, so the search box on a locally-served
-page won't return results. To try search locally, run `npm run build` (which
-does index it) and serve `_site/` yourself, e.g.:
+page won't work at all — open the browser console and you'll see
+`/pagefind/*` requests 404 and the inline initialiser throw
+`ReferenceError: PagefindUI is not defined`, not just an empty results list.
+To try search locally, run `npm run build` (which does index it) and serve
+`_site/` yourself, e.g.:
 
 ```sh
 npm run build
@@ -135,26 +138,32 @@ the live site. In plain language, the checks are:
 
 - Every guide has a `title`.
 - `section` is exactly `mobile` or `computer` — nothing else.
-  Example: `computer-foo.md: section "Computer" is not mobile or computer`
+  Example: `computer-foo: section "Computer" is not mobile or computer`
 - `order` is present and is a whole number.
-  Example: `computer-foo.md: order "5.5" is not a whole number`
+  Example: `computer-foo: order "5.5" is not a whole number`
 - No two guides in the same section share the same `order`.
   Example: `computer-foo, computer-bar all claim computer order 5`
 - Every filename listed in `next` is a real guide, isn't the guide itself,
   and isn't listed twice.
-  Examples: `computer-foo.md: "next" names computer-typo, which is not a
-  guide` / `computer-foo.md: "next" points at itself`
+  Examples: `computer-foo: "next" names computer-typo, which is not a
+  guide` / `computer-foo: "next" points at itself`
 - If `jobaid` is set, that exact filename exists in `assets/pdfs/`.
-  Example: `computer-foo.md: job aid computer-foo.pdf is not in assets/pdfs/`
+  Example: `computer-foo: job aid computer-foo.pdf is not in assets/pdfs/`
 - If `video` is set, it has an `id`, and that `id` is digits only (a Vimeo
   id, not a URL or anything else).
-  Example: `computer-foo.md: video id "https://vimeo.com/123" is not a
+  Example: `computer-foo: video id "https://vimeo.com/123" is not a
   Vimeo id (expected digits only)`
-- If `video.download` is set, it's a bare Drive file id (letters, digits,
-  `-` and `_` only) — not a full Drive URL.
-  Example: `computer-foo.md: video download id
+- If `video.download` or `video.gridDownload` is set, it's a bare Drive file
+  id (letters, digits, `-` and `_` only) — not a full Drive URL — and it
+  isn't blank.
+  Example: `computer-foo: video download id
   "https://drive.google.com/uc?export=download&id=abc" is not a Drive
   file id (expected letters, digits, - and _ only)`
+- `layout` must be set (it's what turns the body text into an actual page —
+  a guide missing it builds as a bare, unstyled fragment with no chrome).
+  Example: `computer-foo: layout is missing`
+- If `video.minutes` is set, it must be a number, not e.g. a pasted "4 min".
+  Example: `computer-foo: video minutes "4 min" is not a number`
 - Two guides can't end up showing the same heading on the "Watch all
   videos" page (their `video.title`, or their plain `title` if no
   `video.title` is set).
@@ -181,19 +190,27 @@ embedded player will go blank with no warning — the build only checks that
 a `video.id` *looks like* a Vimeo id (digits), not that the video is still
 reachable.
 
-**Google Drive** is the fallback for offline use: nine guides also carry a
-`video.download` field (a Drive file id) that renders a "Save for offline
-use?" link below the video, for school staff on an unreliable connection
+**Google Drive** is the fallback for offline use, and there are eighteen
+Drive links in total — nine guides each carry two separate Drive file ids
+for the same video, not one shared between them:
+
+- `video.download` renders a "Save for offline use?" link below the player
+  on that guide's own page.
+- `video.gridDownload` renders that same video's "↓ Download" link on the
+  "Watch all videos" page.
+
+Both exist for the same reason: school staff on an unreliable connection
 who would rather download the file than stream it. This is the more
-fragile of the two dependencies — each of those nine links breaks silently
-the moment its individual Drive share lapses or the file is moved, and
-nothing in the build can detect that (it only checks that `video.download`
-*looks like* a bare Drive file id, not a pasted URL — not that the file is
-still shared).
+fragile of the two dependencies (Vimeo/Drive) — each of those eighteen
+links breaks silently the moment its individual Drive share lapses or the
+file is moved, and nothing in the build can detect that (it only checks
+that `video.download`/`video.gridDownload` *looks like* a bare Drive file
+id, not a pasted URL — not that the file is still shared).
 
 If either breaks, the fix is the same shape: get the source file, re-host
 it (on Vimeo, or upload a fresh copy to Drive and share it publicly), and
-update that one guide's `video.id` or `video.download`.
+update that one guide's `video.id`, `video.download`, or
+`video.gridDownload` — whichever one broke.
 
 ## Where this came from
 
@@ -240,6 +257,21 @@ matches a fresh extraction" round-trip block near the end of
 `tests/test_import.py`'s `main()` function (it's clearly marked with a
 comment) and keep the rest of the script, which still checks
 `tools/import_from_mirror.py` itself against its fixtures.
+
+The Python suites (`tests/test_import.py` and the migration-only
+`tests/test_extract_embeds.py`, `tests/test_fetch_pdfs.py`,
+`tests/test_mirror.py`) aren't part of `npm test` and need their own
+dependencies once, from the repo root:
+
+```sh
+pip install -r requirements.txt
+python3 tests/test_import.py
+python3 tests/test_extract_embeds.py
+python3 tests/test_fetch_pdfs.py
+python3 tests/test_mirror.py
+```
+
+Each prints `ok`/`FAIL` per check and exits non-zero if anything failed.
 
 ## Deploying
 
