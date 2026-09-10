@@ -11,18 +11,19 @@ layout: base.njk
 {% endif %}
 
 {% if jobaid %}
+{% set pdf = jobaid | pdfMeta %}
 <hr class="divider">
 <div class="resource-block">
   <div class="resource-header">
     <span class="resource-header-label label-jobaid">Job aid</span>
-    <span class="resource-header-meta">PDF</span>
+    <span class="resource-header-meta">PDF &middot; {{ pdf.pages }} page{% if pdf.pages != 1 %}s{% endif %}</span>
   </div>
   <div class="pdf-container">
     <iframe src="{{ ('/assets/pdfs/' + jobaid) | url }}" title="{{ title }} — Job aid"></iframe>
   </div>
 </div>
 <div class="download-row">
-  <span class="download-hint">{{ title }} · PDF</span>
+  <span class="download-hint">{{ title }} &middot; PDF &middot; {{ pdf.size }}</span>
   <a class="download-btn" href="{{ ('/assets/pdfs/' + jobaid) | url }}" download>&darr; Download</a>
 </div>
 {% endif %}

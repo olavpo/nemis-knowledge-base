@@ -144,3 +144,19 @@ test("a subdirectory build prefixes a guide page's PDF and card URLs", () => {
   assert.deepEqual($(".next-list a.card").map((_, a) => $(a).attr("href")).get(),
     ["/kb/mobile-enrol-individually/", "/kb/mobile-enrol-staff/"]);
 });
+
+test("job aid metadata is read from the PDF, not typed", () => {
+  const $ = load("mobile-install-login/index.html");
+  assert.match($(".resource-header-meta").last().text(), /PDF · 2 pages/);
+  assert.match($(".download-hint").text(), /PDF · \d+(\.\d)? (KB|MB)$/);
+});
+
+test("every guide that has a job aid shows a size and a page count", () => {
+  for (const slug of SLUGS) {
+    const $ = load(`${slug}/index.html`);
+    assert.match($(".resource-header-meta").last().text(),
+      /PDF · \d+ page/, `${slug} has no page count`);
+    assert.match($(".download-hint").text(),
+      /· \d+(\.\d)? (KB|MB)$/, `${slug} has no file size`);
+  }
+});

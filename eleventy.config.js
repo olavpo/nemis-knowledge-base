@@ -1,8 +1,14 @@
+import { join } from "node:path";
 import yaml from "js-yaml";
+import { pdfMeta, warmPdfMeta } from "./lib/pdf-meta.js";
 
 export default function (eleventyConfig) {
   eleventyConfig.addDataExtension("yaml", (contents) => yaml.load(contents));
   eleventyConfig.addPassthroughCopy({ assets: "assets" });
+
+  const PDF_DIR = join(import.meta.dirname, "assets", "pdfs");
+  eleventyConfig.on("eleventy.before", async () => { await warmPdfMeta(PDF_DIR); });
+  eleventyConfig.addFilter("pdfMeta", (file) => pdfMeta(join(PDF_DIR, file)));
 
   const SECTION_ORDER = { mobile: 0, computer: 1 };
 
