@@ -1,0 +1,26 @@
+---
+pagination:
+  data: redirects
+  size: 1
+  alias: redirect
+redirects:
+  - from: Enrol-learners-individually
+    to: /mobile-enrol-individually/
+  - from: Enrol-an-existing-staff-member
+    to: /computer-enrol-existing-staff/
+permalink: "{{ redirect.from }}/index.html"
+eleventyExcludeFromCollections: true
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moved</title>
+<link rel="canonical" href="{{ redirect.to | url }}">
+<meta http-equiv="refresh" content="0; url={{ redirect.to | url }}">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<p>This page has moved to <a href="{{ redirect.to | url }}">{{ redirect.to }}</a>.</p>
+</body>
+</html>

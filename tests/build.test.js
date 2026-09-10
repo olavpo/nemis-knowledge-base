@@ -193,3 +193,15 @@ test("each job aid's page count and size match the committed PDF exactly", () =>
       `${slug} download hint expected to end with "· ${size}", got "${$(".download-hint").text().trim()}"`);
   }
 });
+
+test("the two renamed URLs still resolve", () => {
+  const moved = {
+    "Enrol-learners-individually": "/mobile-enrol-individually/",
+    "Enrol-an-existing-staff-member": "/computer-enrol-existing-staff/",
+  };
+  for (const [from, to] of Object.entries(moved)) {
+    const $ = load(`${from}/index.html`);
+    assert.equal($('meta[http-equiv="refresh"]').attr("content"), `0; url=${to}`);
+    assert.equal($('link[rel="canonical"]').attr("href"), to);
+  }
+});
