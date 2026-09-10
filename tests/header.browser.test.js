@@ -235,6 +235,97 @@ test("at 400px with JavaScript disabled, nav links and the search input are stil
   }
 });
 
+test("both toggles have accessible names and aria-controls pointing at a real element", async () => {
+  const page = await newPage(400);
+  try {
+    const navToggle = page.getByRole("button", { name: "Menu" });
+    const searchToggle = page.getByRole("button", { name: "Search" });
+    await assert.doesNotReject(() => navToggle.waitFor({ state: "visible" }));
+    await assert.doesNotReject(() => searchToggle.waitFor({ state: "visible" }));
+
+    const controls = await page.evaluate(() => {
+      const navControls = document.getElementById("nav-toggle").getAttribute("aria-controls");
+      const searchControls = document.getElementById("search-toggle").getAttribute("aria-controls");
+      return {
+        navControls,
+        navControlsExists: !!document.getElementById(navControls),
+        searchControls,
+        searchControlsExists: !!document.getElementById(searchControls),
+      };
+    });
+    assert.ok(controls.navControlsExists, `aria-controls="${controls.navControls}" on the hamburger should resolve to a real element`);
+    assert.ok(controls.searchControlsExists, `aria-controls="${controls.searchControls}" on the search toggle should resolve to a real element`);
+  } finally {
+    await page.close();
+  }
+});
+
+test("both toggles have a full 40x40px hit area at 400px", async () => {
+  const page = await newPage(400);
+  try {
+    const boxes = await page.evaluate(() => {
+      const rect = (el) => { const r = el.getBoundingClientRect(); return { width: r.width, height: r.height }; };
+      return {
+        navToggle: rect(document.getElementById("nav-toggle")),
+        searchToggle: rect(document.getElementById("search-toggle")),
+      };
+    });
+    assert.ok(boxes.navToggle.width >= 40 && boxes.navToggle.height >= 40, `hamburger hit area is ${boxes.navToggle.width}x${boxes.navToggle.height}`);
+    assert.ok(boxes.searchToggle.width >= 40 && boxes.searchToggle.height >= 40, `search toggle hit area is ${boxes.searchToggle.width}x${boxes.searchToggle.height}`);
+  } finally {
+    await page.close();
+  }
+});
+
+test("opening one panel closes the other, in both directions", async () => {
+  const page = await newPage(400);
+  try {
+    await page.click("#nav-toggle");
+    let state = await page.evaluate(() => ({
+      nav: document.getElementById("site-nav").classList.contains("is-open"),
+      search: document.getElementById("search").classList.contains("is-open"),
+    }));
+    assert.deepEqual(state, { nav: true, search: false }, "opening the hamburger should open the nav panel only");
+
+    await page.click("#search-toggle");
+    state = await page.evaluate(() => ({
+      nav: document.getElementById("site-nav").classList.contains("is-open"),
+      search: document.getElementById("search").classList.contains("is-open"),
+    }));
+    assert.deepEqual(state, { nav: false, search: true }, "opening search should close the nav panel that was open");
+
+    await page.click("#nav-toggle");
+    state = await page.evaluate(() => ({
+      nav: document.getElementById("site-nav").classList.contains("is-open"),
+      search: document.getElementById("search").classList.contains("is-open"),
+    }));
+    assert.deepEqual(state, { nav: true, search: false }, "opening the hamburger again should close the search panel that was open");
+  } finally {
+    await page.close();
+  }
+});
+
+test("at 700px, Escape closes the open search panel and restores focus to the search toggle", async () => {
+  const page = await newPage(700);
+  try {
+    await page.click("#search-toggle");
+    const opened = await page.evaluate(() => document.getElementById("search").classList.contains("is-open"));
+    assert.ok(opened, "search panel should be open after activating the toggle");
+
+    await page.keyboard.press("Escape");
+    const closed = await page.evaluate(() => ({
+      open: document.getElementById("search").classList.contains("is-open"),
+      expanded: document.getElementById("search-toggle").getAttribute("aria-expanded"),
+      focusedId: document.activeElement?.id,
+    }));
+    assert.equal(closed.open, false, "Escape should close the search panel");
+    assert.equal(closed.expanded, "false");
+    assert.equal(closed.focusedId, "search-toggle", "focus should return to the search toggle button");
+  } finally {
+    await page.close();
+  }
+});
+
 test("typing a search query does not grow the header or move the hero", async () => {
   const page = await newPage(1200);
   try {

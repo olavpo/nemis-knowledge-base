@@ -138,6 +138,14 @@ of `assets/style.css`. `npm test` includes browser-driven tests for this
 locally served copy of `_site/` — if Chromium isn't installed yet, run
 `npx playwright install chromium` once first.
 
+`playwright` is pinned to an exact version (`1.62.0`, not `^1.62.0`) rather
+than left as a range, because that version's expected Chromium build has to
+match whatever Chromium revision is actually installed wherever the tests
+run — a newer `playwright` expects a newer Chromium and will fail to launch
+against an older one still on disk. If you ever bump this version, re-run
+`npx playwright install chromium` straight after so the installed browser
+matches again.
+
 ## What the build checks
 
 Before the site is built, every guide file is checked against a set of rules
