@@ -18,12 +18,35 @@ jobs:
       - run: npm ci
       - run: npm test
 
+      - name: Check the deploy secrets are set
+        run: |
+          missing=()
+          [ -z "$DEPLOY_KEY" ] && missing+=("DEPLOY_KEY")
+          [ -z "$DEPLOY_HOST" ] && missing+=("DEPLOY_HOST")
+          [ -z "$DEPLOY_USER" ] && missing+=("DEPLOY_USER")
+          [ -z "$DEPLOY_PATH" ] && missing+=("DEPLOY_PATH")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required secret(s): ${missing[*]}. Refusing to deploy:" \
+                 "an empty DEPLOY_PATH turns the rsync destination into" \
+                 "user@host: (no path), which rsync resolves to the deploy" \
+                 "user's home directory, and --delete would then wipe" \
+                 "everything there that isn't in _site/."
+            exit 1
+          fi
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
       - name: Load the deploy key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
       - name: Copy the site across
         run: |
