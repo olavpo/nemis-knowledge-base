@@ -12,9 +12,7 @@ export default function (eleventyConfig) {
       (a.data.order - b.data.order)));
 
   eleventyConfig.addFilter("guideBySlug", function (slug) {
-    const guides = this.ctx?.collections?.guides
-      || this.context?.environments?.collections?.guides
-      || [];
+    const guides = this.ctx?.collections?.guides || [];
     return guides.find((g) => g.fileSlug === slug);
   });
 
