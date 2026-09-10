@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Google Sans', 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f4;
+    color: #1a1a1a;
+    padding: 24px;
+  }
+  .device-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: #2d6a4f;
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .page-desc {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 32px 0;
+  }
+  .resource-block { margin-bottom: 8px; }
+  .resource-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 16px;
+    border-bottom: none;
+  }
+  .resource-header-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  .label-video { color: #c0392b; }
+  .label-jobaid { color: #2c5fad; }
+  .resource-header-meta { font-size: 12px; color: #888; }
+  .video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: #1a1a1a;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+  }
+  .video-container iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+  .pdf-container {
+    width: 100%;
+    height: 560px;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    background: #fff;
+  }
+  .pdf-container iframe { width: 100%; height: 100%; border: none; }
+  .download-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 32px;
+    padding: 0 2px;
+  }
+  .download-hint { font-size: 12px; color: #888; }
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d6a4f;
+    background: #fff;
+    border: 1px solid #2d6a4f;
+    border-radius: 6px;
+    padding: 6px 14px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .download-btn:hover { background: #2d6a4f; color: #fff; text-decoration: none; }
+  .next-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+  }
+  .card:hover {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 1px #2d6a4f22;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px; }
+  .card-tags { display: flex; gap: 6px; }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .tag-video { background: #e8f4f0; color: #1e5c3e; }
+  .tag-jobaid { background: #f0f4ff; color: #3a5aad; }
+  .card-arrow { font-size: 20px; color: #aaa; margin-left: 12px; }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="device-badge">Mobile phone</div>
+  <h1 class="page-title">Enter classroom data</h1>
+  <p class="page-desc">After reviewing these resources, you will be able to record classroom information in the DNEMIS app, including the number of rooms, their condition, and availability by grade level.</p>
+
+  <hr class="divider">
+
+  <!-- VIDEO -->
+  <div class="resource-block">
+    <div class="resource-header">
+      <span class="resource-header-label label-video">Video</span>
+      <span class="resource-header-meta">4 min</span>
+    </div>
+    <div class="video-container">
+      <iframe
+        src="https://player.vimeo.com/video/1172391616"
+        title="Enter classroom data"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+  <div class="download-row">
+    <span class="download-hint">Save for offline use?</span>
+    <a class="download-btn" href="https://drive.google.com/uc?export=download&id=1VCxGv_H7PHdHx3mLvlnpkKL_P2ZLvje4" target="_blank">↓ Download video</a>
+  </div>
+
+  <hr class="divider">
+
+  <!-- JOB AID -->
+  <div class="resource-block">
+    <div class="resource-header">
+      <span class="resource-header-label label-jobaid">Job aid</span>
+      <span class="resource-header-meta">PDF · 2 pages</span>
+    </div>
+    <div class="pdf-container">
+      <iframe
+        src="https://drive.google.com/file/d/1a_YwtgEUam1mOP8G0grthf4R15aNr66i/preview"
+        title="Enter classroom data — Job aid">
+      </iframe>
+    </div>
+  </div>
+  <div class="download-row">
+    <span class="download-hint">Enter classroom data · PDF · 1,8 MB</span>
+    <a class="download-btn" href="https://drive.google.com/uc?export=download&id=1a_YwtgEUam1mOP8G0grthf4R15aNr66i" target="_blank">↓ Download</a>
+  </div>
+
+  <hr class="divider">
+
+  <!-- DO THIS NEXT -->
+  <div class="next-label">Do this next</div>
+
+  <a class="card" href="https://sites.google.com/view/nemisknowledgebase/Enrol-learners-individually">
+    <div class="card-text">
+      <div class="card-title">Enrol learners individually</div>
+      <div class="card-tags">
+        <span class="tag tag-video">Video</span>
+          <span class="tag tag-jobaid">Job aid</span>
+      </div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <a class="card" href="https://sites.google.com/view/nemisknowledgebase/mobile-enrol-staff">
+    <div class="card-text">
+      <div class="card-title">Enrol a staff member</div>
+      <div class="card-tags">
+        <span class="tag tag-video">Video</span>
+          <span class="tag tag-jobaid">Job aid</span>
+      </div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+<script>
+  function sendHeight() {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  const observer = new MutationObserver(sendHeight);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+</script>
+</body>
+</html>

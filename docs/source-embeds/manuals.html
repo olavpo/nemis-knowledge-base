@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Roboto', 'Google Sans', 'Segoe UI', Arial, sans-serif;
+    background: #fff4d6;
+    color: #1a1a1a;
+    padding: 24px;
+  }
+
+  .section {
+    margin-bottom: 40px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #007d53;
+    margin-bottom: 4px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+  }
+
+  .section-icon {
+    flex-shrink: 0;
+    color: #007d53;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    border-color: #007d53;
+    box-shadow: 0 0 0 1px #007d5322;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card:focus-visible {
+    outline: none;
+    border-color: #007d53;
+    box-shadow: 0 0 0 2px #007d5355;
+  }
+
+  .card-text {
+    flex: 1;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .tag-pdf {
+    background: #fde8e8;
+    color: #8a2a2a;
+  }
+
+  .tag-size {
+    background: #eee;
+    color: #555;
+  }
+
+  .card-download {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #007d53;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 16px; }
+    .section-title { font-size: 18px; }
+    .card { padding: 12px 14px; }
+    .card-download span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- MANUALS SECTION -->
+  <div class="section">
+    <div class="section-label">Manuals</div>
+    <div class="section-title">
+      <svg class="section-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Reference manuals
+    </div>
+    <div class="section-desc">Full handbooks for download and offline reference</div>
+
+    <a class="card" href="https://drive.google.com/uc?export=download&id=1oZZFto5uFWeb3N_Xsi4ZhGf6dB1T0G6K">
+      <div class="card-text">
+        <div class="card-title">Handbook for States</div>
+        <div class="card-desc">ASC &amp; Learner Registry data entry</div>
+        <div class="card-tags">
+          <span class="tag tag-pdf">PDF</span>
+          <span class="tag tag-size">864 KB</span>
+        </div>
+      </div>
+      <div class="card-download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Download</span>
+      </div>
+    </a>
+
+  </div>
+
+</body>
+</html>

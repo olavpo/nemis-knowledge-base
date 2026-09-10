@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Google Sans', 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f4;
+    color: #1a1a1a;
+    padding: 24px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 700px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .video-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: #1a1a1a;
+  }
+
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .video-info {
+    padding: 12px 14px 14px;
+  }
+
+  .video-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .download-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d6a4f;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .download-link:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+  <div class="grid">
+
+    <!-- VIDEO 1: Install the app and log in -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172389199" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Install the app and log in</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1M1SHBMHdxd9LjB9w1KZUmsFGh0JwtdD0" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 2: Enrol learners individually on Android -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1183840330" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enrol learners individually on Android</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1K6rFtQ0HR2uoyVn27CmIrtGcz3HYgeNU" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 3: Enrol a staff member on Android -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391393" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enrol a staff member on Android</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1kv0f7f731WN76lhqF9jk4oMK43fO41eS" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 4: Enter classroom data on Android -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391616" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enter classroom data on Android</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1IJ6PLy1wRrFDJUqqxBXTEJSIc-T-4cPc" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 5: Log in and navigate DNEMIS -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391157" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Log in and navigate DNEMIS</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1g5UUNAndvFdSLkY0CsopBs0hnlD0XbmU" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 6: Enter school census data -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391217" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enter school census data</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1N2bfEXItp-GJ3W1p4gokUNlHHd6GCGqX" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 7: Enrol learners individually (Web) -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1179201360" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enrol learners individually (Web)</div>
+        <a class="download-link" href="https://drive.google.com/file/d/1n-eG65tICyR2bHnopzU3pr48cwnugRI3/view?usp=sharing" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 8: Enrol a staff member (Web) -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391288" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enrol a staff member (Web)</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1TMq2h4loY7rJY2rnFDjTczjpQCDlANG5" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+    <!-- VIDEO 9: Enter classroom data (Web) -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe src="https://player.vimeo.com/video/1172391350" allowfullscreen></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Enter classroom data (Web)</div>
+        <a class="download-link" href="https://drive.google.com/uc?export=download&id=1jthp-QbguH2tfa3F_eWy5IJgIptosdbS" target="_blank">↓ Download</a>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  function sendHeight() {
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  const observer = new MutationObserver(sendHeight);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+</script>
+</body>
+</html>
