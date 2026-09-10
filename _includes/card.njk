@@ -1,0 +1,10 @@
+<a class="card" href="{{ guide.url | url }}">
+  <div class="card-text">
+    <div class="card-title">{{ guide.data.title }}</div>
+    <div class="card-tags">
+      {% if guide.data.video %}<span class="tag tag-video">Video</span>{% endif %}
+      {% if guide.data.jobaid %}<span class="tag tag-jobaid">Job aid</span>{% endif %}
+    </div>
+  </div>
+  <div class="card-arrow">&rsaquo;</div>
+</a>

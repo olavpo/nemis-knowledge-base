@@ -1,0 +1,39 @@
+---
+layout: base.njk
+---
+<div class="device-badge">{% if section == "mobile" %}Mobile phone{% else %}Computer or laptop{% endif %}</div>
+<h1 class="page-title">{{ title }}</h1>
+<div class="page-desc">{{ content | safe }}</div>
+
+{% if video %}
+<hr class="divider">
+{% include "video.njk" %}
+{% endif %}
+
+{% if jobaid %}
+<hr class="divider">
+<div class="resource-block">
+  <div class="resource-header">
+    <span class="resource-header-label label-jobaid">Job aid</span>
+    <span class="resource-header-meta">PDF</span>
+  </div>
+  <div class="pdf-container">
+    <iframe src="{{ ('/assets/pdfs/' + jobaid) | url }}" title="{{ title }} — Job aid"></iframe>
+  </div>
+</div>
+<div class="download-row">
+  <span class="download-hint">{{ title }} · PDF</span>
+  <a class="download-btn" href="{{ ('/assets/pdfs/' + jobaid) | url }}" download>&darr; Download</a>
+</div>
+{% endif %}
+
+{% if next and next.length %}
+<hr class="divider">
+<div class="next-label">Do this next</div>
+<div class="next-list">
+  {% for slug in next %}
+    {% set guide = slug | guideBySlug %}
+    {% if guide %}{% include "card.njk" %}{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
