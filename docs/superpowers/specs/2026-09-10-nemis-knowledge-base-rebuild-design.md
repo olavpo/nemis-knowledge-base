@@ -101,8 +101,13 @@ mirror_google_site.py      stays at the root, with refresh.sh and tests/
 ## Build
 
 Eleventy. Markdown plus Nunjucks templates, no client-side framework. Output is
-a plain folder of static files that works at a domain root, in a subdirectory,
-or opened off disk — so the hosting decision stays open.
+a plain folder of static files, so the hosting decision stays open.
+
+URLs are root-relative (`/assets/style.css`). Serving from a subdirectory works
+by setting Eleventy's `pathPrefix` at build time. Opening the output straight
+off disk with `file://` does not work, which the mirror allowed; it is not
+worth the cost, since every candidate host serves from a root and a local
+preview is one command (`npm start`).
 
 Search uses Pagefind, which indexes at build time and runs in the browser. It
 replaces the Google Sites search box, which cannot work off Google.
@@ -133,6 +138,9 @@ hero — is rebuilt in that stylesheet to match.
 
 The `postMessage` iframe-height scripts in the embeds are dropped. They exist
 only because Google Sites renders the block in an iframe. Nothing here does.
+
+All twelve guide pages also carry CSS for a `.rating-block` feedback widget
+that no page uses. It is dead and is not carried over.
 
 ## URLs
 
