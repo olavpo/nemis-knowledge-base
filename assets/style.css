@@ -491,6 +491,89 @@ body {
   }
 }
 
+/* Result list. Out of the box this renders with zero horizontal padding
+   (text flush against the drawer edge), a 10.67px excerpt (shrunk by the
+   same --pagefind-ui-scale that correctly sizes the search input, above),
+   and a browser-default yellow-on-black <mark> — none of it reading as
+   part of this site. Same specificity trick as .pagefind-ui__search-clear
+   and .pagefind-ui__drawer above: every selector here is prefixed with
+   #search for (1,1,0) specificity, which beats Pagefind's own
+   .svelte-scoped classes regardless of load order, without !important.
+   Verify every value with getComputedStyle in a real browser if Pagefind
+   is ever upgraded — a source read isn't enough (see the file header
+   comment on the search box further up).
+   Longhand padding-left/right (rather than the padding shorthand) so the
+   calc(...)-based top/bottom padding Pagefind sets from --pagefind-ui-scale
+   is left alone; only the horizontal padding is ours. */
+#search .pagefind-ui__result {
+  position: relative;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-top: none;
+}
+#search .pagefind-ui__result:last-of-type {
+  border-bottom: none;
+}
+#search .pagefind-ui__result:hover {
+  background: var(--page);
+}
+/* The divider between entries: Pagefind's own border-top/bottom (removed
+   above) sit on the <li>, so they run the full width of the drawer,
+   edge to edge, ignoring the padding just added. Putting the rule on
+   .pagefind-ui__result-inner instead — which already sits inset by the
+   <li>'s own left/right padding — makes it stop at the same 16px the text
+   is indented by, rather than bleeding to the drawer's edges. Skipped on
+   the first result so it doesn't double up with the drawer's own border. */
+#search .pagefind-ui__result:not(:first-of-type) .pagefind-ui__result-inner {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+#search .pagefind-ui__result-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+/* Pagefind's own rule colours this via --pagefind-ui-text (var(--ink) per
+   the site-search block above), which already keeps it off browser-default
+   link-blue — restated explicitly here so the result link's colour doesn't
+   depend on that variable continuing to double up for both general copy
+   and the link, which is itself a deliberate approximation (see the
+   site-search comment above). */
+#search .pagefind-ui__result-link {
+  color: var(--ink);
+  text-decoration: none;
+}
+#search .pagefind-ui__result-excerpt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #666;
+}
+/* The existing "Video" tag colours (--tag-video, see .tag-video above),
+   reused as the highlight accent instead of the browser-default yellow on
+   black — subtle rather than shouting. */
+#search mark {
+  background: #e8f4f0;
+  color: #1e5c3e;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+/* Same font-size/weight/letter-spacing/uppercase treatment as
+   .section-label above, but --ink-muted rather than --green: this is a
+   status caption ("13 results for enrol"), not a section heading. */
+#search .pagefind-ui__message {
+  padding-left: 16px;
+  padding-right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
 /* ---- responsive header: search collapses to an icon first (<840px),
    then the nav collapses into a hamburger panel (<600px) — see
    assets/header.js for the toggle behaviour. Both collapsed panels anchor
