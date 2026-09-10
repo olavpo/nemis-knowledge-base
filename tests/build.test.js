@@ -490,8 +490,33 @@ test("the search box is themed through Pagefind's custom properties, not by over
                       "--pagefind-ui-scale"]) {
     assert.ok(rule[1].includes(prop), `.site-search does not declare ${prop}`);
   }
-  assert.ok(!/\.pagefind-ui__search-clear\s*\{/.test(css),
-    "found a direct override on .pagefind-ui__search-clear — theme it via the custom properties instead");
+  // Every occurrence of the clear-button selector must be the id-scoped
+  // exception below, not a bare/class-scoped override — a bare one is what
+  // tied on specificity and lost against pagefind-ui.css's load order the
+  // first time around.
+  const clearSelectorCount = (css.match(/\.pagefind-ui__search-clear\s*\{/g) || []).length;
+  const idScopedClearCount = (css.match(/#search \.pagefind-ui__search-clear\s*\{/g) || []).length;
+  assert.equal(clearSelectorCount, idScopedClearCount,
+    "found a non-id-scoped override on .pagefind-ui__search-clear — theme it via the custom properties, or the #search id-scoped exception, instead");
   assert.ok(!/\.pagefind-ui__result-title\s+a\s*\{/.test(css),
     "found a direct override on .pagefind-ui__result-title a — theme it via the custom properties instead");
+});
+
+// Fix round 2 (Task 9 review): moving the clear button's colour to
+// --pagefind-ui-text (round 1's fix for the result-link colour) also moved
+// its font-size onto --pagefind-ui-scale, which is tuned to bring the
+// *search input* to 14px. The clear button scales from a different base
+// (14px vs. the input's 21px), so the same 0.667 scale that fixed the input
+// left the clear button at 9.3px — smaller than it was before Task 9 added
+// search at all (11.2px), and too small to read comfortably on an
+// interactive control. Fixed with #search .pagefind-ui__search-clear, whose
+// (1,1,0) specificity beats Pagefind's own (0,2,0) selector regardless of
+// stylesheet load order, so it doesn't reintroduce the fragility fix round 1
+// removed. Confirmed live: the input stayed at 14.007px and the clear
+// button moved from 9.338px to 12px in the same browser check.
+test("the clear button's font-size is restored to a readable size, without re-fighting specificity for it", () => {
+  const css = read("assets/style.css");
+  const rule = css.match(/#search \.pagefind-ui__search-clear\s*\{([^}]*)\}/s);
+  assert.ok(rule, "#search .pagefind-ui__search-clear rule not found in the built stylesheet");
+  assert.match(rule[1], /font-size:\s*12px/, "expected the clear button's font-size to be set to 12px");
 });

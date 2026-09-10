@@ -292,10 +292,23 @@ body {
      (result titles, excerpts, the clear button) scales down proportionally
      from its own, larger base rather than landing on its own hand-picked
      value — there's no single scale that hits all of them at once, and the
-     search input is the element visitors actually read and type into. */
+     search input is the element visitors actually read and type into. The
+     clear button's own base (14px) would need a different scale to reach a
+     comfortable size; that's restored directly below instead. */
   --pagefind-ui-scale: 0.667;
 }
 .site-search .pagefind-ui__search-input:focus {
   outline: none;
   border-color: var(--green);
 }
+/* --pagefind-ui-scale (above) sizes this at 9.3px — smaller than it was
+   before Task 9's search styling existed at all, and too small to read
+   comfortably on an interactive control. Fixed with an id-based selector
+   rather than a specificity war: #search .pagefind-ui__search-clear is
+   (1,1,0), which beats Pagefind's own .pagefind-ui__search-clear.svelte-xxxxx
+   at (0,2,0) regardless of stylesheet load order, so this doesn't depend on
+   pagefind-ui.css continuing to load after this file. Confirm the class name
+   against the installed version's emitted _site/pagefind/pagefind-ui.css if
+   Pagefind is ever upgraded — the id-based specificity is what matters here,
+   not this literal selector string. */
+#search .pagefind-ui__search-clear { font-size: 12px; }
