@@ -1,0 +1,8 @@
+<div class="section">
+  <div class="section-label">{{ group.label }}</div>
+  <div class="section-title">{{ group.title }}</div>
+  <div class="section-desc">{{ group.description }}</div>
+  {%- for guide in collections.guides %}
+    {%- if guide.data.section == group.key %}{% include "card.njk" %}{% endif -%}
+  {%- endfor %}
+</div>

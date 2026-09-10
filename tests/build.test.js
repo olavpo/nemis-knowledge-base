@@ -229,3 +229,30 @@ test("the redirect stubs are not in the search index", () => {
   // 12 guides + the home page; the 2 redirect stubs must not add to this.
   assert.equal(urls.length, SLUGS.length + 1);
 });
+
+test("the home page lists both sections with the original copy", () => {
+  const $ = load("index.html");
+  assert.deepEqual($(".section-label").map((_, e) => $(e).text().trim()).get(),
+    ["Mobile phone", "Computer or laptop"]);
+  assert.deepEqual($(".section-title").map((_, e) => $(e).text().trim()).get(),
+    ["Using your mobile phone", "Using your computer or laptop"]);
+  assert.deepEqual($(".section-desc").map((_, e) => $(e).text().trim()).get(),
+    ["Using the DNEMIS app on your Android phone",
+     "Via any web browser (Chrome, Firefox or Edge)"]);
+});
+
+test("the home page lists all twelve guides in order", () => {
+  const $ = load("index.html");
+  assert.deepEqual($(".section a.card").map((_, a) => $(a).attr("href")).get(),
+    SLUGS.map((s) => `/${s}/`));
+});
+
+test("home page tags follow each guide's own fields", () => {
+  const $ = load("index.html");
+  const tagsFor = (slug) => $(`.section a.card[href="/${slug}/"] .tag`)
+    .map((_, t) => $(t).text().trim()).get();
+  assert.deepEqual(tagsFor("mobile-install-login"), ["Video", "Job aid"]);
+  assert.deepEqual(tagsFor("computer-enrol-bulk"), ["Job aid"]);
+  assert.deepEqual(tagsFor("computer-change-password"), ["Job aid"]);
+  assert.deepEqual(tagsFor("mobile-enrol-staff"), ["Video", "Job aid"]);
+});
