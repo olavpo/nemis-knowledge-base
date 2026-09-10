@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
+# SUPERSEDED. The site is no longer a mirror of the Google Site: it is built
+# from the Markdown in content/ (see README.md). This script only refreshes
+# site/, which is now an archival copy of the original used for comparison.
+# It must not be pointed at the live web root.
+#
 # Re-copy the Google Site and, optionally, push it to a web server.
 #
 # Use this while the site is still edited in Google Sites: editors carry on
 # working there, and this script refreshes the self-hosted copy.
 #
 #   ./refresh.sh                          # refresh the local copy only
-#   DEPLOY_TARGET=user@host:/var/www/nemis ./refresh.sh
 #
 # The live copy is only replaced after a successful run, so a failed or
 # partial download cannot take the site down.
@@ -15,7 +19,6 @@ set -euo pipefail
 SITE_URL="${SITE_URL:-https://sites.google.com/view/nemisknowledgebase}"
 OUT="${OUT:-site}"
 MIN_PAGES="${MIN_PAGES:-2}"
-DEPLOY_TARGET="${DEPLOY_TARGET:-}"
 
 here="$(cd "$(dirname "$0")" && pwd)"
 staging="$(mktemp -d)"
@@ -32,8 +35,3 @@ fi
 rm -rf "$here/${OUT:?}"
 mv "$staging/site" "$here/$OUT"
 echo "Local copy refreshed: $here/$OUT ($pages pages)"
-
-if [ -n "$DEPLOY_TARGET" ]; then
-  rsync -az --delete "$here/$OUT/" "$DEPLOY_TARGET/"
-  echo "Deployed to $DEPLOY_TARGET"
-fi
