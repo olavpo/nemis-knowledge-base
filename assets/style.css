@@ -255,12 +255,17 @@ body {
 }
 .pdf-container iframe { width: 100%; height: 100%; border: none; }
 
+/* Grouped at the left (not space-between, which put the hint and button in
+   opposite corners of the video/PDF frame above — ~850px apart at this
+   site's 852px content width, reading as unrelated) with a comfortable gap
+   between them so the two read as one control. Left rather than right to
+   agree with the videos page's lower-left download link below. */
 .download-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
   margin: 10px 0 32px;
   padding: 0 2px;
 }
