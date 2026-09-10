@@ -129,6 +129,15 @@ python3 -m http.server --directory _site 8080
 writing anything, so two builds in a row produce identical output — it never
 leaves old files behind from a previous build.
 
+The site header's responsive behaviour (the search box collapsing to an
+icon, and the nav links collapsing into a hamburger panel, on narrower
+screens) is a small amount of vanilla JavaScript in `assets/header.js`,
+alongside the header's markup in `_includes/base.njk` and its CSS at the top
+of `assets/style.css`. `npm test` includes browser-driven tests for this
+(`tests/header.browser.test.js`) that drive headless Chromium against a
+locally served copy of `_site/` — if Chromium isn't installed yet, run
+`npx playwright install chromium` once first.
+
 ## What the build checks
 
 Before the site is built, every guide file is checked against a set of rules
