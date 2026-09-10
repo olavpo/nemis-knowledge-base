@@ -6,6 +6,51 @@
 <title>{% if title and title != site.title %}{{ site.title }} - {{ title }}{% else %}{{ site.title }}{% endif %}</title>
 <link rel="stylesheet" href="{{ '/assets/style.css' | url }}">
 <link rel="stylesheet" href="{{ '/pagefind/pagefind-ui.css' | url }}">
+<!-- Below 840px the header normally collapses behind two JS-driven toggles
+     (search -> icon, then nav -> hamburger below 600px; see
+     assets/header.js). Without JavaScript neither toggle can do anything,
+     so leaving that collapsed markup in place would hide the nav links
+     and/or the search box with no way to reach them — worse than the
+     three-row header this project started from. <noscript> is only ever
+     parsed and applied when scripting is off, so this reverts both
+     breakpoints to their plain, always-reachable, pre-collapse layout
+     (wrapping to two or three rows, which is an acceptable trade for
+     "everything stays reachable"); with JavaScript on, this block is
+     inert and nothing here applies. Same specificity as the rules it
+     overrides (see assets/style.css), winning on source order — no
+     !important, consistent with the rest of this project's CSS. -->
+<noscript>
+<style>
+  @media (max-width: 839px) {
+    .site-header-bar { flex-wrap: wrap; }
+    .search-toggle { display: none; }
+    .site-search {
+      display: block;
+      position: static;
+      max-width: 260px;
+      padding: 0;
+      background: none;
+      border-top: none;
+      box-shadow: none;
+    }
+  }
+  @media (max-width: 599px) {
+    .nav-toggle { display: none; }
+    .site-nav {
+      display: flex;
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 0;
+      background: none;
+      border-top: none;
+      box-shadow: none;
+    }
+    .site-nav a { padding: 4px 0; border-bottom: 2px solid transparent; }
+  }
+</style>
+</noscript>
 </head>
 <body>
 

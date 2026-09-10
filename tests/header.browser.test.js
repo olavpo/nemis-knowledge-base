@@ -67,6 +67,18 @@ async function newPage(width, height = 900) {
   return page;
 }
 
+// A page in its own JS-disabled browser context, for the <noscript>
+// fallback (see _includes/base.njk's <head>). Returns both the context and
+// the page so the test can close the context (which closes the page with
+// it) rather than the page alone.
+async function newNoScriptPage(width, height = 900) {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.setViewportSize({ width, height });
+  await page.goto(baseUrl, { waitUntil: "load" });
+  return { context, page };
+}
+
 // Distinct top offsets of the header-bar's direct children, ignoring ones
 // hidden by display:none (width/height 0). Items of different intrinsic
 // height can legitimately land at slightly different tops within a single
@@ -185,6 +197,41 @@ test("at 400px the hamburger is present and nav links are hidden until it opens,
     assert.equal(closed.focusedId, "nav-toggle");
   } finally {
     await page.close();
+  }
+});
+
+test("at 400px with JavaScript disabled, nav links and the search input are still reachable and neither toggle renders", async () => {
+  // The <noscript> fallback in base.njk's <head> is the only thing standing
+  // between "script fails to load on a phone" and "no way to navigate or
+  // search" — this is the one test that actually exercises it, by disabling
+  // scripting in a fresh browser context rather than just reading the CSS.
+  const { context, page } = await newNoScriptPage(400);
+  try {
+    const info = await page.evaluate(() => {
+      const nav = document.getElementById("site-nav");
+      const search = document.getElementById("search");
+      return {
+        navDisplay: getComputedStyle(nav).display,
+        linksVisible: Array.from(nav.querySelectorAll("a")).map((a) => a.getBoundingClientRect().width > 0),
+        searchDisplay: getComputedStyle(search).display,
+        navToggleDisplay: getComputedStyle(document.getElementById("nav-toggle")).display,
+        searchToggleDisplay: getComputedStyle(document.getElementById("search-toggle")).display,
+      };
+    });
+    assert.notEqual(info.navDisplay, "none", "nav should be visible with no JS");
+    assert.deepEqual(info.linksVisible, [true, true, true], "all three nav links should be visible with no JS");
+    assert.notEqual(info.searchDisplay, "none", "the search field should be visible with no JS");
+    assert.equal(info.navToggleDisplay, "none", "the hamburger can't do anything with no JS, so it must not render");
+    assert.equal(info.searchToggleDisplay, "none", "the search icon can't do anything with no JS, so it must not render");
+
+    // "Reachable" means focusable, not just visually present.
+    const firstLink = page.locator(".site-nav a").first();
+    await firstLink.focus();
+    const focusedHref = await page.evaluate(() => document.activeElement?.getAttribute("href"));
+    const firstHref = await firstLink.getAttribute("href");
+    assert.equal(focusedHref, firstHref, "the first nav link should be focusable with no JS");
+  } finally {
+    await context.close();
   }
 });
 
