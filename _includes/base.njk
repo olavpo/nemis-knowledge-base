@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if title and title != site.title %}{{ site.title }} - {{ title }}{% else %}{{ site.title }}{% endif %}</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="site-brand" href="/">
+    <img class="site-logo" src="{{ site.logo }}" alt="{{ site.logoAlt }}">
+    <span class="site-title">{{ site.title }}</span>
+  </a>
+  <nav class="site-nav">
+    {% for item in site.nav %}
+    <a href="{{ item.url }}"{% if item.url == page.url %} aria-current="page"{% endif %}>{{ item.text }}</a>
+    {% endfor %}
+  </nav>
+</header>
+
+{% if hero %}
+<div class="hero">
+  <h1 class="hero-title">{{ hero.title or site.hero.title }}</h1>
+  <p class="hero-subtitle">{{ hero.subtitle or site.hero.subtitle }}</p>
+</div>
+{% endif %}
+
+<main class="site-main">
+{{ content | safe }}
+</main>
+
+<footer class="site-footer">{{ site.footer }}</footer>
+
+</body>
+</html>

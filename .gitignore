@@ -9,3 +9,7 @@ __pycache__/
 
 # Staging area for tools/fetch_pdfs.py
 incoming-pdfs/
+
+# Eleventy
+_site/
+node_modules/

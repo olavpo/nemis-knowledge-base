@@ -1,0 +1,11 @@
+title: DNEMIS Knowledge Base
+logo: /assets/logo.png
+logoAlt: Federal Ministry of Education
+hero:
+  title: Training guides & videos
+  subtitle: Step-by-step guides and videos for every task in DNEMIS
+nav:
+  - { text: Home, url: / }
+  - { text: Manuals, url: /manuals/ }
+  - { text: Watch all videos, url: /watch-all-videos/ }
+footer: Federal Ministry of Education · DNEMIS
