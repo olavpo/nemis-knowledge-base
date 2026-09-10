@@ -431,3 +431,30 @@ test("no page links to a URL that was not built", () => {
     }
   }
 });
+
+test("the search index is built and covers every page", () => {
+  assert.ok(existsSync(new URL("../_site/pagefind/pagefind.js", import.meta.url)),
+    "pagefind did not run — check the build script");
+});
+
+test("the search UI is on every page", () => {
+  for (const page of ["index.html", "manuals/index.html",
+                      "mobile-install-login/index.html"]) {
+    const $ = load(page);
+    assert.equal($("#search").length, 1, `${page} has no search box`);
+  }
+});
+
+// The brief's original third test here was malformed: it summed two
+// $(...).length values with a >= 1 comparison that was true even if one
+// selector matched zero elements, and its descendant selector
+// ".site-header [data-pagefind-ignore]" looked for data-pagefind-ignore
+// *inside* the header, when the attribute belongs on the header element
+// itself. Replaced with direct assertions on where data-pagefind-body and
+// data-pagefind-ignore actually live.
+test("the chrome is excluded from the index so results are page content", () => {
+  const $ = load("index.html");
+  assert.equal($("main.site-main[data-pagefind-body]").length, 1);
+  assert.equal($(".site-header[data-pagefind-ignore]").length, 1);
+  assert.equal($(".site-footer[data-pagefind-ignore]").length, 1);
+});

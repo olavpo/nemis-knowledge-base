@@ -128,6 +128,14 @@ const CSS_FIDELITY_MAP = {
 //    otherwise use for card colour.
 // 3. .video-container iframe, .pdf-container iframe — both only declare
 //    `border: none`. No concrete colour value on either side to compare.
+// 4. .site-search, .site-search .pagefind-ui__search-input,
+//    .site-search .pagefind-ui__search-input:focus,
+//    .site-search .pagefind-ui__search-clear,
+//    .site-search .pagefind-ui__result-title a — the search box added in
+//    Task 9. The original site's search was Google Sites' own widget, never
+//    captured in docs/source-embeds/, so there is no source rule to compare
+//    against; its colours were chosen to match the site's existing tokens
+//    (--font, --line, --green, --ink-muted) instead.
 
 // Only these count as "colour-bearing": color, background(-color), and any
 // border* shorthand/longhand (border, border-color, border-top, ...) — the
