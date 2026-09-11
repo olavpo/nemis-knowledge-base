@@ -1,8 +1,17 @@
 ---
 layout: base.njk
 ---
-<div class="device-badge">{% if section == "mobile" %}Mobile phone{% else %}Computer or laptop{% endif %}</div>
-<h1 class="page-title">{{ title }}</h1>
+{% set deviceLabel = "Mobile phone" if section == "mobile" else "Computer or laptop" %}
+<div class="device-badge">{{ deviceLabel }}</div>
+{#- Search results otherwise can't tell apart the phone and computer
+   versions of the same guide (e.g. two results both reading "Enter
+   classroom data"): six of the twelve guides share their title exactly
+   with their other-device counterpart. Pagefind derives a result's title
+   from the page's first <h1> unless data-pagefind-meta="title:..." is
+   present, in which case the explicit value wins — so this overrides the
+   indexed title to include the device, without changing what's visually
+   on the page (the device already shows in the badge above). #}
+<h1 class="page-title" data-pagefind-meta="title:{{ title }} · {{ deviceLabel }}">{{ title }}</h1>
 <div class="page-desc">{{ content | safe }}</div>
 
 {% if video %}

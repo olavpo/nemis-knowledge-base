@@ -163,3 +163,82 @@ test("search results have left padding, a readable excerpt, and a site-coloured 
     await page.close();
   }
 });
+
+// ---- Issue 4: search results disambiguate the phone/computer guide pairs ----
+//
+// Six of the twelve guides come in a phone version and a computer version,
+// and several pairs share a title exactly ("Enter classroom data",
+// "Enrol learners individually"). guide.njk now sets
+// data-pagefind-meta="title:<title> · <device>" on the page's <h1>, which
+// Pagefind reads in preference to the automatic first-<h1> title — so the
+// search result itself gains the device without the on-page heading
+// changing. These tests drive the real PagefindUI in a browser, the same
+// way the panel-styling test above does, because Pagefind builds the
+// result list itself; there is no markup to inspect statically.
+
+test("search results for a shared guide title disambiguate the phone and computer versions", async () => {
+  const page = await newPage(1200);
+  try {
+    await page.click(".pagefind-ui__search-input");
+    await page.type(".pagefind-ui__search-input", "classroom");
+    await page.waitForSelector(".pagefind-ui__result", { timeout: 10000 });
+    await page.waitForTimeout(300);
+
+    const titles = await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".pagefind-ui__result-title")).map((t) => t.textContent.trim())
+    );
+    const classroomTitles = titles.filter((t) => t.startsWith("Enter classroom data"));
+    assert.equal(classroomTitles.length, 2,
+      `expected both "Enter classroom data" guides among the results, got: ${JSON.stringify(titles)}`);
+    assert.notEqual(classroomTitles[0], classroomTitles[1],
+      "the two 'Enter classroom data' results must read differently from each other");
+    assert.ok(classroomTitles.some((t) => t.includes("Mobile phone")),
+      `expected one result to mention "Mobile phone", got: ${JSON.stringify(classroomTitles)}`);
+    assert.ok(classroomTitles.some((t) => t.includes("Computer or laptop")),
+      `expected one result to mention "Computer or laptop", got: ${JSON.stringify(classroomTitles)}`);
+  } finally {
+    await page.close();
+  }
+});
+
+test("a non-guide page's search result title is unchanged, with no device suffix", async () => {
+  const page = await newPage(1200);
+  try {
+    await page.click(".pagefind-ui__search-input");
+    await page.type(".pagefind-ui__search-input", "manuals");
+    await page.waitForSelector(".pagefind-ui__result", { timeout: 10000 });
+    await page.waitForTimeout(300);
+
+    const titles = await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".pagefind-ui__result-title")).map((t) => t.textContent.trim())
+    );
+    assert.ok(titles.includes("Reference manuals"),
+      `expected the /manuals/ page's plain title among the results, got: ${JSON.stringify(titles)}`);
+    for (const title of titles) {
+      assert.ok(!title.includes("Mobile phone") && !title.includes("Computer or laptop"),
+        `non-guide result "${title}" should not carry a device suffix`);
+    }
+  } finally {
+    await page.close();
+  }
+});
+
+// On a guide page itself, the device already appears in the badge above the
+// heading — the visible <h1> must stay exactly the plain title, with the
+// device only added to the indexed (invisible) meta title.
+test("a guide page's visible <h1> is unchanged by the search meta title", async () => {
+  const page = await newPage(1200);
+  try {
+    await page.goto(baseUrl + "mobile-classroom-data/", { waitUntil: "networkidle" });
+    const h1 = await page.evaluate(() => {
+      const el = document.querySelector("h1.page-title");
+      return { text: el.textContent.trim(), meta: el.getAttribute("data-pagefind-meta") };
+    });
+    assert.equal(h1.text, "Enter classroom data",
+      "the visible <h1> must stay just the plain title, not the title plus device");
+    assert.equal(h1.meta, "title:Enter classroom data · Mobile phone",
+      "the h1's data-pagefind-meta must carry the device-qualified title for search");
+  } finally {
+    await page.close();
+  }
+});
