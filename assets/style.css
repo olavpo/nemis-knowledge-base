@@ -5,6 +5,8 @@
   --ink-soft: #444;
   --ink-muted: #888;
   --line: #e0e0e0;
+  --tag-video: #1e5c3e;
+  --tag-jobaid: #2c5fad;
   --radius: 8px;
   --font: 'Google Sans', 'Segoe UI', Arial, sans-serif;
 }
@@ -160,7 +162,7 @@ body {
 }
 .card-text { flex: 1; }
 .card-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
-.card-desc { font-size: 13px; color: #666; margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-arrow { font-size: 20px; color: #aaa; margin-left: 12px; line-height: 1; }
 
@@ -193,10 +195,10 @@ body {
   padding: 2px 8px;
   border-radius: 20px;
 }
-.tag-video { background: #e8f4f0; color: #1e5c3e; }
-.tag-jobaid { background: #f0f4ff; color: #3a5aad; }
+.tag-video { background: #e8f4f0; color: var(--tag-video); }
+.tag-jobaid { background: #f0f4ff; color: var(--tag-jobaid); }
 .tag-pdf { background: #fde8e8; color: #8a2a2a; }
-.tag-size { background: #eee; color: #555; }
+.tag-size { background: #eee; color: var(--ink-soft); }
 
 .divider { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
 
@@ -231,8 +233,8 @@ body {
   letter-spacing: 1.4px;
   text-transform: uppercase;
 }
-.label-video { color: #c0392b; }
-.label-jobaid { color: #2c5fad; }
+.label-video { color: var(--tag-video); }
+.label-jobaid { color: var(--tag-jobaid); }
 .resource-header-meta { font-size: 12px; color: var(--ink-muted); }
 
 .video-container {
@@ -313,7 +315,7 @@ body {
   margin-bottom: 4px;
 }
 .section-title { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
-.section-desc { font-size: 14px; color: #555; margin-bottom: 16px; }
+.section-desc { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; }
 .section-icon { vertical-align: -3px; margin-right: 6px; color: var(--green); }
 
 /* ---- video grid ---- */
@@ -571,7 +573,7 @@ body {
   min-width: 0;
   font-size: 12.5px;
   line-height: 1.5;
-  color: #666;
+  color: var(--ink-soft);
 }
 /* The existing "Video" tag colours (--tag-video, see .tag-video above),
    reused as the highlight accent instead of the browser-default yellow on
