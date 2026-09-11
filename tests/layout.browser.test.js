@@ -4,7 +4,7 @@
 // button sitting in opposite corners of the video/PDF frame, and the
 // Pagefind search results panel rendering with no horizontal padding, a
 // too-small excerpt, and a browser-default yellow <mark>. None of this is
-// visible to the DOM-only tests in build.test.js or css-fidelity.test.js —
+// visible to the DOM-only tests in build.test.js —
 // it's real layout and computed style, so this drives Chromium against the
 // built _site over an actual HTTP server, same approach as
 // tests/header.browser.test.js (see that file's header comment for why

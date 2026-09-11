@@ -5,8 +5,8 @@
 // anything out). Both defects these tests guard — the search drawer
 // pushing the page down instead of floating over it, and the header
 // wrapping to extra rows on narrow screens — are exactly that class of
-// bug, and neither would be caught by the DOM-only tests in build.test.js
-// or css-fidelity.test.js. So these drive real Chromium against the built
+// bug, and neither would be caught by the DOM-only tests in build.test.js.
+// So these drive real Chromium against the built
 // _site over an actual HTTP server (not file://, which breaks Pagefind's
 // own fetches) and assert on layout measurements, not markup.
 //

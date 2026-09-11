@@ -11,6 +11,13 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* --page (#f4f6f4) is used for every page, manuals included. The original
+   Google Sites manuals page had its own body background (#fff4d6, a cream
+   tone) — but that was a Google Sites artifact of each "page" being an
+   iframed embed floating inside a shared shell, not a structural choice
+   worth preserving: this rebuild has no iframe, body IS the whole page, so
+   carrying the cream over would make the manuals page look less like the
+   original, not more. Keep #f4f6f4 everywhere; do not "restore" #fff4d6. */
 body {
   font-family: var(--font);
   background: var(--page);
@@ -157,12 +164,13 @@ body {
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-arrow { font-size: 20px; color: #aaa; margin-left: 12px; line-height: 1; }
 
-/* Manuals card's download affordance (docs/source-embeds/manuals.html
-   :119-127, :161-169). The source uses #007d53 here; this project unified
-   that green to #2d6a4f (--green) for .section-label (see
-   tests/css-fidelity.test.js), and this is the same deliberate deviation for
-   consistency, not a fidelity miss — see CSS_FIDELITY_MAP's comment on both
-   selectors. */
+/* Manuals card's download affordance. The original manuals.html source
+   used #007d53 here, but this project unified that green to #2d6a4f
+   (--green) for .section-label and every other card/label colour too — a
+   genuine inconsistency in the original site (manuals.html's own
+   .section-label and .card:hover/:focus-visible used #007d53, while
+   home.html and every guide embed used #2d6a4f), resolved deliberately in
+   favor of #2d6a4f everywhere. Do not "restore" #007d53 here. */
 .card-download {
   display: flex;
   align-items: center;
@@ -387,8 +395,7 @@ body {
 .download-link:hover { text-decoration: underline; }
 
 /* Search — new UI added by Pagefind, no counterpart in the original site's
-   Google-powered search widget; see tests/css-fidelity.test.js's
-   deliberately-unmapped list.
+   Google-powered search widget, so there's no source colour to match here.
    Themed through Pagefind's own CSS custom properties (its documented
    styling API — https://pagefind.app/docs/ui/#styling-with-css), not by
    overriding its classes: pagefind-ui.css loads after this stylesheet and

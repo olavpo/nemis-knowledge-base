@@ -304,42 +304,5 @@ workflow stops there and nothing is published.
 | `_includes/` | The Nunjucks templates that lay out every page — page chrome and nav (`base.njk`), a guide page (`guide.njk`), the video embed (`video.njk`), and card/section partials. |
 | `assets/` | Static files copied into the built site as-is: `style.css`, `header.js`, `logo.png`, and the PDFs in `assets/pdfs/`. |
 | `lib/` | Small JS modules used by `eleventy.config.js`: `validate.js` (the checks above) and `pdf-meta.js` (reads a PDF's page count and file size for display on the page). |
-| `tests/` | The automated checks. `npm test` runs every `tests/*.test.js` file; a few standalone Python scripts also live here (see "Files the build doesn't use" below). |
+| `tests/` | The automated checks. `npm test` runs every `tests/*.test.js` file. |
 | `.github/workflows/` | The two GitHub Actions workflows described above under "Deploying". |
-
-## Files the build doesn't use
-
-A handful of files in this repository support one-off content-import and
-formatting-check tooling, not the site itself. They are not run by
-`npm start`, `npm run build`, or `npm test`, except where noted:
-
-- `mirror_google_site.py` and `refresh.sh` — save a static copy of a page at
-  a given URL.
-- `tools/extract_embeds.py` — pulls the visible text out of a saved page's
-  HTML into its own file.
-- `tools/import_from_mirror.py` — turns extracted text into
-  `content/guides/*.md` front matter and body text.
-- `tools/fetch_pdfs.py` and `tools/pdf-sources.json` — download PDFs into
-  `incoming-pdfs/` (gitignored) so they can be committed into
-  `assets/pdfs/`.
-- `docs/superpowers/` — design and implementation-plan documents written
-  while building this site.
-- `docs/source-embeds/` — the extracted page text mentioned above, one file
-  per page. **This one is load-bearing for `npm test`**: `tests/css-fidelity.test.js`
-  reads these files at test time to check the site's CSS colours against
-  them, so removing this directory would break the test suite.
-- `tests/test_mirror.py`, `tests/test_extract_embeds.py`,
-  `tests/test_import.py`, `tests/test_fetch_pdfs.py` — Python tests for the
-  scripts above. `npm test` does not run these (it only picks up
-  `tests/*.test.js`); running them by hand needs their own dependencies
-  once, from the repo root:
-
-  ```sh
-  pip install -r requirements.txt
-  python3 tests/test_mirror.py
-  python3 tests/test_extract_embeds.py
-  python3 tests/test_import.py
-  python3 tests/test_fetch_pdfs.py
-  ```
-
-  Each prints `ok`/`FAIL` per check and exits non-zero if anything failed.
